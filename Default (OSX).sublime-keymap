@@ -1,0 +1,3 @@
+[
+		{ "keys": ["ctrl+alt+f"], "command": "js_format"}
+]
