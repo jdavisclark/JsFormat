@@ -1,12 +1,21 @@
-### Summary
+## Summary
 
-Uses the commandline/python-module javascript formatter from http://jsbeautifier.org/ to format the selected text, or the entire file if there is no selection. Plugin does not check to make sure the buffer has a ".js" file type, it just javascript formats the selection/file. Thus, use with caution if you are in an html file.
+Uses the commandline/python-module javascript formatter from http://jsbeautifier.org/ to format the selected text, 
+or the entire file if there is no selection. Plugin does not check to make sure the buffer has a ".js" file type, 
+it just javascript formats the selection/file. Thus, use with caution if you are in an html file.
 
-### Install
+## Install
 
-Extract the download archive, paste the JsBeautifier folder in the Sublime Text 2 "Packages" directory, which is located where ever the "Preferences" -> "Browse Packages" option in sublime takes you.
+#### Git Clone
+Clone this repository in to the Sublime Text 2 "Packages" directory, which is located where ever the 
+"Preferences" -> "Browse Packages" option in sublime takes you.
 
-### Key Binding
+#### Package Control
+Add https://jdc0589@github.com/jdc0589/JsFormat.git as a Package Control repository. JsFormat will show up in the
+package install list.
+
+
+## Key Binding
 
 The default key binding is "ctrl+alt+f"
 
