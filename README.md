@@ -24,5 +24,6 @@ package install list.
 The default key binding is "ctrl+alt+f"
 
 ## Updates
+* 12/3/2011 - Indentation character/count is now pulled from the current sublime settings
 * 8/25/2011 - Added sublime-commands file. "Format: Javascript" now appears in the command palette
 * 8/25/2011 - scrolls back to whatever line you were on prior to formatting the file (middle of screen) rather than leaving the view position at the top of the file after formatting.
