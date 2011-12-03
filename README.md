@@ -11,6 +11,10 @@ Clone this repository in to the Sublime Text 2 "Packages" directory, which is lo
 "Preferences" -> "Browse Packages" option in sublime takes you.
 
 #### Package Control
+JsFormat is now included in the default repository channel for Package Control. It should show up in your install list
+with no changes.
+
+If it does not show up, or you are on an older version of Package Control:
 Add https://github.com/jdc0589/JsFormat as a Package Control repository. JsFormat will show up in the
 package install list.
 
