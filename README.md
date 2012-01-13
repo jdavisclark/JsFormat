@@ -5,7 +5,7 @@ or the entire file if there is no selection. Plugin does not check to make sure 
 it just javascript formats the selection/file. Thus, use with caution if you are in an html file.
 
 ## Settings
-JsFormat will uses whatever tab character settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
+JsFormat uses whatever tab character settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
 
 In addition, the following settings can be overridden in your user file settings (defaults shown below):
 
