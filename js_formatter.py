@@ -6,8 +6,6 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		settings = self.view.settings()
 
-		print s.get("max_preserve_newlines")
-
 		opts = jsbeautifier.default_options()
 		opts.indent_char = " " if settings.get("translate_tabs_to_spaces") else "\t"
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1 
