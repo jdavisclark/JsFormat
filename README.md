@@ -7,27 +7,29 @@ it just javascript formats the selection/file. Thus, use with caution if you are
 ## Settings
 JsFormat uses whatever tab character settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
 
-In addition, the following settings can be overridden in your user file settings (defaults shown below):
+In addition, the following settings are available in JsFormat/JsFormat.sublime-settings (defaults shown below):
 
-* "jsformat_max_preserve_newlines": 3
-* "jsformat_preserve_newlines": true
-* "jsformat_jslint_happy": false
-* "jsformat_brace_style": "collapse"
-* "jsformat_keep_array_indentation": false
-* "jsformat_indent_level": 0
+* "max_preserve_newlines": 4
+* "preserve_newlines": true
+* "jslint_happy": false
+* "brace_style": "collapse"
+* "keep_array_indentation": false
+* "indent_level": 0
 
 ## Install
-#### Git Clone
-Clone this repository in to the Sublime Text 2 "Packages" directory, which is located where ever the 
-"Preferences" -> "Browse Packages" option in sublime takes you.
-
-#### Package Control
-JsFormat is now included in the default repository channel for Package Control. It should show up in your install list
+#### [Package Control](https://github.com/wbond/sublime_package_control) (*Recommended*)
+JsFormat is now included in the default repository channel for [Package Control](https://github.com/wbond/sublime_package_control). It should show up in your install list
 with no changes.
 
 If it does not show up, or you are on an older version of Package Control:
 Add https://github.com/jdc0589/JsFormat as a Package Control repository. JsFormat will show up in the
 package install list.
+
+#### Git Clone
+Clone this repository in to the Sublime Text 2 "Packages" directory, which is located where ever the 
+"Preferences" -> "Browse Packages" option in sublime takes you.
+
+
 
 
 ## Key Binding
