@@ -32,7 +32,8 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		sel = self.view.sel()
 		sel.clear()
 		self.view.sel().add(sublime.Region(pt))
-		self.view.show(pt)
+
+		self.view.show_at_center(pt)
 
 
 	def prev_non_whitespace(self):
