@@ -4,6 +4,13 @@ It uses the commandline/python-module javascript formatter from http://jsbeautif
 or the entire file if there is no selection. The plugin does not check to make sure the buffer has a ".js" file type, 
 it just javascript formats the selection/file. Thus, use with caution if you are in an html file.
 
+*I am investigating replacing JsFormat with an 'all in one' formatting plugin to support multiple languages: [Format](http://github.com/jdc0589/Format) (very very pre-alpha). JsFormat's complete feature set would be present for js/json files. Please leave me some feedback if you think this is a good/bad idea.*
+
+## Features
+* javascript/json formatting (obviously)
+* all settings are customizable (whitespace, formatting style, etc..)
+* puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
+
 ## Settings
 JsFormat uses whatever tab character settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
 
