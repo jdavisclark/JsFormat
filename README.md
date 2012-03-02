@@ -47,6 +47,8 @@ The default key binding is "ctrl+alt+f"
 
 Open the command palette via "ctrl + shift + p", Jsformat appears as "Format: Javascript"
 
+---
+
 ### License
 Copyright (C) 2012 Davis Clark
 
