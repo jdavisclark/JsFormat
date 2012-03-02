@@ -43,6 +43,10 @@ Clone this repository in to the Sublime Text 2 "Packages" directory, which is lo
 
 The default key binding is "ctrl+alt+f"
 
+## Command Palette
+
+Open the command palette via "ctrl + shift + p", Jsformat appears as "Format: Javascript"
+
 ### License
 Copyright (C) 2012 Davis Clark
 
