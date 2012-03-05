@@ -21,8 +21,22 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		nwsOffset = self.prev_non_whitespace()		
 
 		# do formatting and replacement
-		replaceRegion = selection if len(selection) > 0 else sublime.Region(0, self.view.size())
+		replaceRegion = None
+		formatSelection = False
+
+		# formatting a selection/highlighted area
+		if(len(selection) > 0):
+			formatSelection = True
+			replaceRegion = selection		
+
+		# formatting the entire file	
+		else:			
+			replaceRegion = sublime.Region(0, self.view.size())
+		
 		res = jsbeautifier.beautify(self.view.substr(replaceRegion), opts)
+		if(not formatSelection):
+			res = res + "\n"
+
 		self.view.replace(edit, replaceRegion, res)
 
 		# re-place cursor
