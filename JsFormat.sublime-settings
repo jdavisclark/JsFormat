@@ -1,8 +1,9 @@
 {
 	"brace_style": "collapse",
-	"indent_level": 0,
 	"jslint_happy": false,
 	"keep_array_indentation": false,
 	"max_preserve_newlines": 4,
-	"preserve_newlines": true
+	"preserve_newlines": true,
+    "keep_function_indentation": false,
+    "indent_with_tabs": false
 }
