@@ -21,7 +21,8 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "jslint_happy": false
 * "brace_style": "collapse"
 * "keep_array_indentation": false
-* "indent_level": 0
+* "keep_function_indentation": false
+* "indent_with_tabs": false
 
 ## Install
 #### [Package Control](https://github.com/wbond/sublime_package_control) (*Recommended*)
