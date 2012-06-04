@@ -35,7 +35,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 			replaceRegion = sublime.Region(0, self.view.size())
 
 		res = jsbeautifier.beautify(self.view.substr(replaceRegion), opts)
-		if(not formatSelection):
+		if(not formatSelection and settings.get('ensure_newline_at_eof_on_save')):
 			res = res + "\n"
 
 		self.view.replace(edit, replaceRegion, res)
