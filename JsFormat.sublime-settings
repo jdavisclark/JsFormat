@@ -4,6 +4,7 @@
 	"keep_array_indentation": false,
 	"max_preserve_newlines": 4,
 	"preserve_newlines": true,
-    "keep_function_indentation": false,
-    "indent_with_tabs": false
+	"keep_function_indentation": false,
+	"indent_with_tabs": false,
+	"ensure_newline_at_eof_on_save": false
 }
