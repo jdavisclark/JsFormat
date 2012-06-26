@@ -44,6 +44,11 @@ Clone this repository in to the Sublime Text 2 "Packages" directory, which is lo
 
 The default key binding is "ctrl+alt+f"
 
+## Key Binding Conflicts
+
+Unfortunately there are other plugins that use "ctrl + alt + f", this is a hard problem to solve. If JsFormat works
+OK via the command palette but does nothing when you use the "ctrl + alt + f" shortcut, please change the shortcut in the appropriate *.sublime-keymap file, re-test, and let me know how it went (just submit a bug report). [This is the current bug report we are using to discuss this issue](https://github.com/jdc0589/JsFormat/issues/7)
+
 ## Command Palette
 
 Open the command palette via "ctrl + shift + p", Jsformat appears as "Format: Javascript"
