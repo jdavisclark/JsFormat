@@ -6,6 +6,11 @@ it just javascript formats the selection/file. Thus, use with caution if you are
 
 *I am investigating replacing JsFormat with an 'all in one' formatting plugin to support multiple languages: [Format](http://github.com/jdc0589/Format) (very very pre-alpha). JsFormat's complete feature set would be present for js/json files. Please leave me some feedback if you think this is a good/bad idea.*
 
+## Donations
+Yea... I cetainly wont turn down a donation or two.
+
+<a href='http://www.pledgie.com/campaigns/17687'><img alt='Click here to lend your support to: JsFormat and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/17687.png?skin_name=chrome' border='0' /></a>
+
 ## Features
 * javascript/json formatting (obviously)
 * all settings are customizable (whitespace, formatting style, etc..)
