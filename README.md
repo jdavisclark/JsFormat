@@ -12,7 +12,7 @@ it just javascript formats the selection/file. Thus, use with caution if you are
 * puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
 
 ## Donations
-I cetainly wont turn down a donation or two. Who knows, it might even motivate me to put more time in to the project.
+I certainly won't turn down a donation or two. Who knows, it might even motivate me to put more time in to the project.
 
 <a href='http://www.pledgie.com/campaigns/17687'><img alt='Click here to lend your support to: JsFormat and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/17687.png?skin_name=chrome' border='0' /></a>
 
