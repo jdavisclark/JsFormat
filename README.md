@@ -5,16 +5,13 @@ or the entire file if there is no selection. The plugin does not check to make s
 it just javascript formats the selection/file. Thus, use with caution if you are in an html file.
 
 *I am investigating replacing JsFormat with an 'all in one' formatting plugin to support multiple languages: [Format](http://github.com/jdc0589/Format) (very very pre-alpha). JsFormat's complete feature set would be present for js/json files. Please leave me some feedback if you think this is a good/bad idea.*
+<a href='http://www.pledgie.com/campaigns/17687'><img alt='Click here to lend your support to: JsFormat and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/17687.png?skin_name=chrome' border='0' /></a>
 
 ## Features
 * javascript/json formatting (obviously)
 * all settings are customizable (whitespace, formatting style, etc..)
 * puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
-
-## Donations
-I certainly won't turn down a donation or two. Who knows, it might even motivate me to put more time in to the project.
-
-<a href='http://www.pledgie.com/campaigns/17687'><img alt='Click here to lend your support to: JsFormat and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/17687.png?skin_name=chrome' border='0' /></a>
+* 
 
 ## Settings
 JsFormat uses whatever tab character settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
