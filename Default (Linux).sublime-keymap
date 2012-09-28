@@ -1,3 +1,6 @@
 [
-		{ "keys": ["ctrl+alt+f"], "command": "js_format"}
+	{
+		"keys": ["ctrl+alt+f"], "command": "js_format",
+		"context": [{"key": "selector", "operator": "equal", "operand": "source.js,source.json"}]
+	}
 ]
