@@ -6,5 +6,6 @@
 	"preserve_newlines": true,
 	"keep_function_indentation": false,
 	"indent_with_tabs": false,
-	"ensure_newline_at_eof_on_save": false
+	"ensure_newline_at_eof_on_save": false,
+	"space_before_line_starters": false
 }
