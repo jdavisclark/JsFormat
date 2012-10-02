@@ -42,6 +42,7 @@ class BeautifierOptions:
         self.keep_array_indentation = False
         self.keep_function_indentation = False
         self.eval_code = False
+        self.space_before_line_starters = False
 
 
 
@@ -56,6 +57,7 @@ indent_with_tabs = %s
 brace_style = %s
 keep_array_indentation = %s
 eval_code = %s
+space_before_line_starters = %s
 """ % ( self.indent_size,
         self.indent_char,
         self.preserve_newlines,
@@ -65,6 +67,7 @@ eval_code = %s
         self.brace_style,
         self.keep_array_indentation,
         self.eval_code,
+        self.space_before_line_starters,
         )
 
 
@@ -692,7 +695,8 @@ class Beautifier:
             if self.opts.jslint_happy:
                 self.append(' ')
         elif self.last_text in self.line_starters or self.last_text == 'catch':
-            self.append(' ')
+            if self.opts.space_before_line_starters:
+                self.append(' ')
 
         self.append(token_text)
 
