@@ -690,8 +690,8 @@ class Beautifier:
                 self.append_newline();
         elif self.last_type not in ['TK_WORD', 'TK_OPERATOR']:
             self.append(' ')
-        elif self.last_word in ['for', 'if', 'function', 'typeof']:
-            # if() vs if (), function() vs function (), typeof() vs typeof ()
+        elif self.last_word in ['for', 'if', 'function', 'typeof', 'while', 'switch', 'catch']:
+            # if() vs if (), function() vs function (), typeof() vs typeof () ...
             if self.opts.jslint_happy:
                 self.append(' ')
         elif self.last_text in self.line_starters or self.last_text == 'catch':
