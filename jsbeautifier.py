@@ -690,7 +690,7 @@ class Beautifier:
                 self.append_newline();
         elif self.last_type not in ['TK_WORD', 'TK_OPERATOR']:
             self.append(' ')
-        elif self.last_word == 'if' or self.last_word == 'function' or self.last_word == 'typeof':
+        elif self.last_word in ['for', 'if', 'function', 'typeof']:
             # if() vs if (), function() vs function (), typeof() vs typeof ()
             if self.opts.jslint_happy:
                 self.append(' ')
