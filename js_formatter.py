@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, jsbeautifier, re
+import sublime, sublime_plugin, re, sys, jsbeautifier
 
 s = sublime.load_settings("JsFormat.sublime-settings")
 
