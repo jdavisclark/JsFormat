@@ -1,4 +1,5 @@
-import sublime, sublime_plugin, jsbeautifier, re
+import sublime, sublime_plugin, re
+from .jsbeautifier import *
 
 s = sublime.load_settings("JsFormat.sublime-settings")
 
@@ -7,7 +8,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		settings = self.view.settings()
 
 		# settings
-		opts = jsbeautifier.default_options()
+		opts = default_options()
 		opts.indent_char = " " if settings.get("translate_tabs_to_spaces") else "\t"
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
 		opts.max_preserve_newlines = s.get("max_preserve_newlines") or 3
@@ -35,7 +36,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		else:
 			replaceRegion = sublime.Region(0, self.view.size())
 
-		res = jsbeautifier.beautify(self.view.substr(replaceRegion), opts)
+		res = beautify(self.view.substr(replaceRegion), opts)
 		if(not formatSelection and settings.get('ensure_newline_at_eof_on_save')):
 			res = res + "\n"
 
