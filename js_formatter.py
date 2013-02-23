@@ -1,4 +1,15 @@
-import sublime, sublime_plugin, re, sys, jsbeautifier
+import sublime, sublime_plugin, re, sys, os
+
+# crazyness to get jsbeautifier.unpackers to actually import
+# with sublime's weird hackery of the path and module loading
+directory = os.path.dirname(os.path.realpath(__file__)) + "\\"
+sys.path.append(directory+"\\jsbeaufifier")
+sys.path.append(directory+"\\jsbeautifier\\unpackers")
+
+# if you don't explicitly import jsbeautifier.unpackers here things will bomb out,
+# even though we don't use it directly.....
+import jsbeautifier, jsbeautifier.unpackers
+
 
 s = sublime.load_settings("JsFormat.sublime-settings")
 
@@ -17,7 +28,9 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts.keep_array_indentation = s.get("keep_array_indentation") or False
 		opts.keep_function_indentation = s.get("keep_function_indentation") or False
 		opts.indent_with_tabs = s.get("indent_with_tabs") or False
-		opts.space_before_line_starters = s.get("space_before_line_starters") or False
+		opts.eval_code = s.get("eval_code") or False
+		opts.unescape_strings = s.get("unescape_strings") or False
+		opts.break_chained_methods = s.get("break_chained_methods") or False
 
 		selection = self.view.sel()[0]
 		nwsOffset = self.prev_non_whitespace()

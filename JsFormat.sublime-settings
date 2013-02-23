@@ -1,11 +1,16 @@
 {
-	"brace_style": "collapse",
-	"jslint_happy": false,
-	"keep_array_indentation": false,
-	"max_preserve_newlines": 4,
-	"preserve_newlines": true,
-	"keep_function_indentation": false,
+	// exposed jsbeautifier options
 	"indent_with_tabs": false,
-	"ensure_newline_at_eof_on_save": false,
-	"space_before_line_starters": false
+	"preserve_newlines": true,
+	"max_preserve_newlines": 4,
+	"jslint_happy": false,
+	"brace_style": "collapse",
+	"keep_array_indentation": false,
+	"keep_function_indentation": false,
+	"eval_code": false,
+	"unescape_strings": false,
+	"break_chained_methods": false,
+
+	// jsformat options
+	"ensure_newline_at_eof_on_save": false
 }

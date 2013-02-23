@@ -23,7 +23,6 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "keep_function_indentation": false
 * "indent_with_tabs": false
 * "ensure_newline_at_eof_on_save": false
-* "space_before_line_starters": false
 
 ## Install
 #### [Package Control](https://github.com/wbond/sublime_package_control) (*Recommended*)
