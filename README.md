@@ -24,8 +24,7 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "keep_function_indentation": false
 * "eval_code": false,
 * "unescape_strings": false,
-* "break_chained_methods": false* 
-
+* "break_chained_methods": false*
 * "ensure_newline_at_eof_on_save": false
 * "format_on_save": false
 
