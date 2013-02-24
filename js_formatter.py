@@ -13,6 +13,13 @@ import jsbeautifier, jsbeautifier.unpackers
 
 s = sublime.load_settings("JsFormat.sublime-settings")
 
+class PreSaveFormatListner(sublime_plugin.EventListener):
+	"""Event listener to run JsFormat during the presave event"""
+	def on_pre_save(self, view):
+		if(s.get("format_on_save") == True):
+			view.run_command("js_format")
+
+
 class JsFormatCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		settings = self.view.settings()
