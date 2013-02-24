@@ -15,14 +15,19 @@ JsFormat uses whatever tab character settings are configured with the standard "
 
 In addition, the following settings are available in JsFormat/JsFormat.sublime-settings (defaults shown below):
 
+* "indent_with_tabs": false
 * "max_preserve_newlines": 4
 * "preserve_newlines": true
 * "jslint_happy": false
 * "brace_style": "collapse"
 * "keep_array_indentation": false
 * "keep_function_indentation": false
-* "indent_with_tabs": false
-* "ensure_newline_at_eof_on_save": false
+* "eval_code": false,
+* "unescape_strings": false,
+* "break_chained_methods": false* 
+
+I had an brain fart a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
+was added from that pull request has been lost. ```"ensure_newline_at_eof_on_save"``` is no longer supported.
 
 ## Install
 #### [Package Control](https://github.com/wbond/sublime_package_control) (*Recommended*)
