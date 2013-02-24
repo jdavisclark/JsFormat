@@ -26,6 +26,9 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "unescape_strings": false,
 * "break_chained_methods": false* 
 
+* "ensure_newline_at_eof_on_save": false
+* "format_on_save": false
+
 I had an brain fart a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
 was added from that pull request has been lost. ```"ensure_newline_at_eof_on_save"``` is no longer supported.
 
