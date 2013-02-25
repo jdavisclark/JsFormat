@@ -8,7 +8,7 @@ sys.path.append(os.path.join(directory, "jsbeautifier", "unpackers"))
 
 # if you don't explicitly import jsbeautifier.unpackers here things will bomb out,
 # even though we don't use it directly.....
-import jsbeautifier
+import jsbeautifier, jsbeautifier.unpackers
 
 
 s = sublime.load_settings("JsFormat.sublime-settings")
