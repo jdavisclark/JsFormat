@@ -1,4 +1,5 @@
 import sublime, sublime_plugin, re, sys, os
+from jsformatlib import merge_utils
 
 # crazyness to get jsbeautifier.unpackers to actually import
 # with sublime's weird hackery of the path and module loading
@@ -68,11 +69,14 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		else:
 			replaceRegion = sublime.Region(0, self.view.size())
 
-		res = jsbeautifier.beautify(self.view.substr(replaceRegion), opts)
+		orig = self.view.substr(replaceRegion)
+		res = jsbeautifier.beautify(orig, opts)
 		if(not formatSelection and settings.get('ensure_newline_at_eof_on_save')):
 			res = res + "\n"
 
-		self.view.replace(edit, replaceRegion, res)
+		_, err = merge_utils.merge_code(self.view, edit, orig, res)
+		if err:
+			sublime.error_message("JsFormat: Merge failure: '%s'" % err)
 
 		# re-place cursor
 		offset = self.get_nws_offset(nwsOffset, self.view.substr(sublime.Region(0, self.view.size())))
