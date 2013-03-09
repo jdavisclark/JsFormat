@@ -1,18 +1,32 @@
 import sublime, sublime_plugin, re, sys, os
-from jsformatlib import merge_utils
+
+directory = os.path.dirname(os.path.realpath(__file__))
+
+if sys.version_info < (3, 0):
+	from jsformatlib import merge_utils
+	jsbeautifier_path = os.path.join(directory, "python2")
+else:
+	from .jsformatlib import merge_utils
+	jsbeautifier_path = os.path.join(directory, "python3")
 
 # crazyness to get jsbeautifier.unpackers to actually import
 # with sublime's weird hackery of the path and module loading
-directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(directory, "jsbeaufifier"))
-sys.path.append(os.path.join(directory, "jsbeautifier", "unpackers"))
+if jsbeautifier_path not in sys.path:
+	sys.path.append(jsbeautifier_path)
 
 # if you don't explicitly import jsbeautifier.unpackers here things will bomb out,
 # even though we don't use it directly.....
-import jsbeautifier, jsbeautifier.unpackers
+import jsbeautifier
+import jsbeautifier.unpackers
 
+s = None
 
-s = sublime.load_settings("JsFormat.sublime-settings")
+def plugin_loaded():
+	global s
+	s = sublime.load_settings("JsFormat.sublime-settings")
+
+if sys.version_info < (3, 0):
+	plugin_loaded()
 
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
