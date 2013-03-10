@@ -207,7 +207,7 @@ class Beautifier:
 
 
         if self.opts.brace_style not in ['expand', 'collapse', 'end-expand']:
-            raise(Exception('opts.brace_style must be "expand", "collapse" or "end-expand".'))
+            raise Exception('opts.brace_style must be "expand", "collapse" or "end-expand".')
 
         self.blank_state()
 
@@ -256,7 +256,7 @@ class Beautifier:
         try:
             return unpackers.run(source, evalcode)
         except unpackers.UnpackingError as error:
-            print('error:', error)
+            print('error:' + str(error))
             return ''
 
     def trim_output(self, eat_newlines = False):
