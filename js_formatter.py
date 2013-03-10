@@ -1,23 +1,17 @@
 import sublime, sublime_plugin, re, sys, os
 
 directory = os.path.dirname(os.path.realpath(__file__))
-
-if sys.version_info < (3, 0):
-	from jsformatlib import merge_utils
-	jsbeautifier_path = os.path.join(directory, "python2")
-else:
-	from .jsformatlib import merge_utils
-	jsbeautifier_path = os.path.join(directory, "python3")
+libs_path = os.path.join(directory, "libs")
 
 # crazyness to get jsbeautifier.unpackers to actually import
 # with sublime's weird hackery of the path and module loading
-if jsbeautifier_path not in sys.path:
-	sys.path.append(jsbeautifier_path)
+if libs_path not in sys.path:
+	sys.path.append(libs_path)
 
 # if you don't explicitly import jsbeautifier.unpackers here things will bomb out,
 # even though we don't use it directly.....
-import jsbeautifier
-import jsbeautifier.unpackers
+import jsbeautifier, jsbeautifier.unpackers
+import merge_utils
 
 s = None
 
