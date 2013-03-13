@@ -7,7 +7,8 @@ or the entire file if there is no selection.
 ## Features
 * javascript/json formatting (obviously)
 * all settings are customizable (whitespace, formatting style, etc..)
-* puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
+* puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)* 
+* Sublime Text 3 support (as much as we can support alpha/beta software)
 
 ## Settings
 JsFormat uses whatever tab character settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
