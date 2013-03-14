@@ -36,7 +36,7 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
 		if(syntaxPath != None):
 			syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
 
-		formatFile = "js" in ext or "json" in ext or "javascript" in syntax or "json" in syntax
+		formatFile = ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
 
 		if(s.get("format_on_save") == True and formatFile):
 			view.run_command("js_format")
