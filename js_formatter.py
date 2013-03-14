@@ -79,8 +79,6 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 
 		orig = self.view.substr(replaceRegion)
 		res = jsbeautifier.beautify(orig, opts)
-		if(not formatSelection and settings.get('ensure_newline_at_eof_on_save')):
-			res = res + "\n"
 
 		_, err = merge_utils.merge_code(self.view, edit, orig, res)
 		if err:

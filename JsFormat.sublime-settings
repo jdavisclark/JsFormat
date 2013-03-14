@@ -12,6 +12,5 @@
 	"break_chained_methods": false,
 
 	// jsformat options
-	"ensure_newline_at_eof_on_save": false,
 	"format_on_save": false
 }
