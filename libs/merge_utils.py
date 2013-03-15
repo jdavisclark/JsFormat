@@ -73,9 +73,9 @@ def merge_code(view, edit, code, formatted_code):
     err = ''
     try:
         dirty = _merge_code(view, edit, code, formatted_code)
-    except MergeException as err:
+    except MergeException as exc:
         dirty = True
-        err = "Could not merge changes into the buffer, edit aborted: %s" % err
+        err = "Could not merge changes into the buffer, edit aborted: %s" % exc
         view.replace(edit, sublime.Region(0, view.size()), code)
     except Exception as ex:
         err = "Unknown exception: %s" % ex
