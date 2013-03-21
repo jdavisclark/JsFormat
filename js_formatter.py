@@ -11,12 +11,15 @@ is_py2k = sys.version_info < (3, 0)
 def add_lib_path(lib_path):
 	def _try_get_short_path(path):
 		path = os.path.normpath(path)
-		if is_py2k and os.name == 'nt':
-			from ctypes import windll, create_unicode_buffer
-			buf = create_unicode_buffer(512)
-			path = unicode(path)
-			if windll.kernel32.GetShortPathNameW(path, buf, len(buf)):
-				path = buf.value
+		if is_py2k and os.name == 'nt' and isinstance(path, unicode):
+			try:
+				import locale
+				path = path.encode(locale.getpreferredencoding())
+			except:
+				from ctypes import windll, create_unicode_buffer
+				buf = create_unicode_buffer(512)
+				if windll.kernel32.GetShortPathNameW(path, buf, len(buf)):
+					path = buf.value
 		return path
 	lib_path = _try_get_short_path(lib_path)
 	if lib_path not in sys.path:
