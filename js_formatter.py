@@ -166,3 +166,17 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		_, err = merge_utils.merge_code(view, edit, code, formatted_code)
 		if err:
 			sublime.error_message("JsFormat: Merge failure: '%s'" % err)
+
+	def is_visible(self):
+		fName = self.view.file_name()
+		vSettings = self.view.settings()
+		syntaxPath = vSettings.get('syntax')
+		syntax = ""
+		ext = ""
+
+		if (fName != None): # file exists, pull syntax type from extension
+			ext = os.path.splitext(fName)[1][1:]
+		if(syntaxPath != None):
+			syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
+
+		return ext in ['js', 'json'] or "javascript" in syntax or "json" in synta
