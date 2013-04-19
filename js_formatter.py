@@ -179,4 +179,4 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		if(syntaxPath != None):
 			syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
 
-		return ext in ['js', 'json'] or "javascript" in syntax or "json" in synta
+		return ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
