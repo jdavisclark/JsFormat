@@ -165,9 +165,19 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 
 	def format_whole_file(self, edit, opts):
 		view = self.view
+		settings = view.settings()
 		region = sublime.Region(0, view.size())
 		code = view.substr(region)
 		formatted_code = jsbeautifier.beautify(code, opts)
+
+		if(settings.get("ensure_newline_at_eof_on_save") and not formatted_code.endswith("\n")):
+			lineEnding = {
+				'system': os.linesep,
+				'windows': "\r\n",
+				'unix': "\n"
+			}[""+settings.get("default_line_ending")]
+			formatted_code = formatted_code + lineEnding;			
+
 		_, err = merge_utils.merge_code(view, edit, code, formatted_code)
 		if err:
 			sublime.error_message("JsFormat: Merge failure: '%s'" % err)
