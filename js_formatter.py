@@ -43,23 +43,25 @@ def plugin_loaded():
 if is_py2k:
 	plugin_loaded()
 
+
+def is_js_buffer(view):
+	fName = view.file_name()
+	vSettings = view.settings()
+	syntaxPath = vSettings.get('syntax')
+	syntax = ""
+	ext = ""
+
+	if (fName != None): # file exists, pull syntax type from extension
+		ext = os.path.splitext(fName)[1][1:]
+	if(syntaxPath != None):
+		syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
+
+	return ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
+
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
-	def on_pre_save(self, view):
-		fName = view.file_name()
-		vSettings = view.settings()
-		syntaxPath = vSettings.get('syntax')
-		syntax = ""
-		ext = ""
-
-		if (fName != None): # file exists, pull syntax type from extension
-			ext = os.path.splitext(fName)[1][1:]
-		if(syntaxPath != None):
-			syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
-
-		formatFile = ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
-
-		if(s.get("format_on_save") == True and formatFile):
+	def on_pre_save(self, view):		
+		if(s.get("format_on_save") == True and is_js_buffer(view)):
 			view.run_command("js_format")
 
 
@@ -171,15 +173,4 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 			sublime.error_message("JsFormat: Merge failure: '%s'" % err)
 
 	def is_visible(self):
-		fName = self.view.file_name()
-		vSettings = self.view.settings()
-		syntaxPath = vSettings.get('syntax')
-		syntax = ""
-		ext = ""
-
-		if (fName != None): # file exists, pull syntax type from extension
-			ext = os.path.splitext(fName)[1][1:]
-		if(syntaxPath != None):
-			syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
-
-		return ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
+		return is_js_buffer(self.view)
