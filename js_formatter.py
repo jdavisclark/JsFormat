@@ -175,7 +175,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 				'system': os.linesep,
 				'windows': "\r\n",
 				'unix': "\n"
-			}[""+settings.get("default_line_ending")]
+			}[settings.get("default_line_ending")]
 			formatted_code = formatted_code + lineEnding;			
 
 		_, err = merge_utils.merge_code(view, edit, code, formatted_code)
