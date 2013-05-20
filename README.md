@@ -1,13 +1,13 @@
 ## Summary
 JsFormat is a javascipt formatting plugin for Sublime Text 2.
-It uses the commandline/python-module javascript formatter from http://jsbeautifier.org/ to format the selected text, 
+It uses the commandline/python-module javascript formatter from http://jsbeautifier.org/ to format the selected text,
 or the entire file if there is no selection.
 
 
 ## Features
 * javascript/json formatting (obviously)
 * all settings are customizable (whitespace, formatting style, etc..)
-* puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)* 
+* puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
 * Sublime Text 3 support (as much as we can support alpha/beta software)
 
 ## Settings
@@ -18,6 +18,7 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "indent_with_tabs": false
 * "max_preserve_newlines": 4
 * "preserve_newlines": true
+* "space_in_paren": false
 * "jslint_happy": false
 * "brace_style": "collapse"
 * "keep_array_indentation": false
@@ -42,7 +43,7 @@ Add https://github.com/jdc0589/JsFormat as a Package Control repository. JsForma
 package install list.
 
 #### Git Clone
-Clone this repository in to the Sublime Text 2 "Packages" directory, which is located where ever the 
+Clone this repository in to the Sublime Text 2 "Packages" directory, which is located where ever the
 "Preferences" -> "Browse Packages" option in sublime takes you.
 
 

@@ -60,7 +60,7 @@ def is_js_buffer(view):
 
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
-	def on_pre_save(self, view):		
+	def on_pre_save(self, view):
 		if(s.get("format_on_save") == True and is_js_buffer(view)):
 			view.run_command("js_format")
 
@@ -75,6 +75,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
 		opts.max_preserve_newlines = s.get("max_preserve_newlines") or 3
 		opts.preserve_newlines = s.get("preserve_newlines") or True
+		opts.space_in_paren = s.get("space_in_paren") or False
 		opts.jslint_happy = s.get("jslint_happy") or False
 		opts.brace_style = s.get("brace_style") or "collapse"
 		opts.keep_array_indentation = s.get("keep_array_indentation") or False
@@ -176,7 +177,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 				'windows': "\r\n",
 				'unix': "\n"
 			}[settings.get("default_line_ending")]
-			formatted_code = formatted_code + lineEnding;			
+			formatted_code = formatted_code + lineEnding
 
 		_, err = merge_utils.merge_code(view, edit, code, formatted_code)
 		if err:
