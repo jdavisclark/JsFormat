@@ -172,12 +172,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		formatted_code = jsbeautifier.beautify(code, opts)
 
 		if(settings.get("ensure_newline_at_eof_on_save") and not formatted_code.endswith("\n")):
-			lineEnding = {
-				'system': os.linesep,
-				'windows': "\r\n",
-				'unix': "\n"
-			}[settings.get("default_line_ending")]
-			formatted_code = formatted_code + lineEnding
+			formatted_code = formatted_code + "\n"
 
 		_, err = merge_utils.merge_code(view, edit, code, formatted_code)
 		if err:
