@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys
+import os
 import getopt
 import re
 import string
@@ -64,6 +65,7 @@ class BeautifierOptions:
         self.preserve_newlines = True
         self.max_preserve_newlines = 10
         self.space_in_paren = False
+        self.e4x = False
         self.jslint_happy = False
         self.brace_style = 'collapse'
         self.keep_array_indentation = False
@@ -107,13 +109,14 @@ unescape_strings = %s
 class BeautifierFlags:
     def __init__(self, mode):
         self.mode = mode
+        self.parent = None
         self.last_text = ''
         self.last_word = ''
         self.var_line = False
         self.var_line_tainted = False
         self.var_line_reindented = False
         self.in_html_comment = False
-        self.multiline_array = False
+        self.multiline_frame = False
         self.if_block = False
         self.do_block = False
         self.do_while = False
@@ -121,15 +124,29 @@ class BeautifierFlags:
         self.in_case_statement = False
         self.case_body = False
         self.indentation_level = 0
+        self.line_indent_level = 0
+        self.start_line_index = 0
         self.ternary_depth = 0
 
-    def apply_base(self, flags_base):
+    def apply_base(self, flags_base, added_newline):
+        next_indent_level = flags_base.indentation_level;
+        if flags_base.var_line and flags_base.var_line_reindented:
+            next_indent_level += 1
+        if not added_newline and \
+            flags_base.line_indent_level > next_indent_level:
+            next_indent_level = flags_base.line_indent_level;
+
+        self.parent = flags_base;
         self.last_text = flags_base.last_text
         self.last_word = flags_base.last_word
-        self.indentation_level = flags_base.indentation_level
+        self.indentation_level = next_indent_level
 
-        if flags_base.var_line and flags_base.var_line_reindented:
-            self.indentation_level += 1
+# Using object instead of string to allow for later expansion of info about each line
+class OutputLine:
+    def __init__(self):
+        self.text = []
+
+
 
 
 def default_options():
@@ -177,6 +194,7 @@ Output options:
  -o,  --outfile=FILE               specify a file to output to (default stdout)
  -f,  --keep-function-indentation  Do not re-indent function bodies defined in var lines.
  -x,  --unescape-strings           Decode printable chars encoded in \\xNN notation.
+ -X,  --e4x                        Pass E4X xml literals through untouched
  -w,  --wrap-line-length                   Attempt to wrap line when it exceeds this length.
                                    NOTE: Line continues until next wrap point is found.
 
@@ -217,18 +235,18 @@ class Beautifier:
         self.previous_flags = None
         self.flag_store = []
         self.input_wanted_newline = False
-
         if self.opts.indent_with_tabs:
-            self.indent_string = "\t"
-        else:
-            self.indent_string = self.opts.indent_char * self.opts.indent_size
+            self.opts.indent_char = "\t"
+            self.opts.indent_size = 1
+
+        self.indent_string = self.opts.indent_char * self.opts.indent_size
 
         self.preindent_string = ''
-        self.last_type = 'TK_START_EXPR' # last token type
+        self.last_type = 'TK_START_BLOCK' # last token type
         self.last_last_text = ''         # pre-last token text
 
         self.input = None
-        self.output = []                 # formatted javascript gets built here
+        self.output_lines = [ OutputLine() ]
         self.output_wrapped = False
         self.output_space_before_token = False
         self.whitespace_before_token = []
@@ -292,16 +310,17 @@ class Beautifier:
                 break
 
             keep_whitespace = self.opts.keep_array_indentation and self.is_array(self.flags.mode)
+            self.input_wanted_newline = self.n_newlines > 0
 
             if keep_whitespace:
                  for i in range(self.n_newlines):
-                        self.append_newline(force_newline = True)
+                        self.append_newline(i > 0)
             else: # not keep_whitespace
-                self.input_wanted_newline = self.n_newlines > 0
                 if self.opts.max_preserve_newlines != 0 and self.n_newlines > self.opts.max_preserve_newlines:
                     self.n_newlines = self.opts.max_preserve_newlines
 
                 if self.opts.preserve_newlines and self.n_newlines > 1:
+
                     for i in range(self.n_newlines):
                         self.append_newline(i != 0)
 
@@ -314,7 +333,12 @@ class Beautifier:
                 self.last_type = token_type
                 self.flags.last_text = self.token_text
 
-        sweet_code = self.preindent_string + re.sub('[\n ]+$', '', ''.join(self.output))
+        sweet_code = ''.join(self.output_lines[0].text)
+        if len(self.output_lines) > 1:
+            for line_index in range(1, len(self.output_lines)):
+                sweet_code += '\n' + ''.join(self.output_lines[line_index].text);
+
+        sweet_code = re.sub('[\n ]+$', '', sweet_code)
         return sweet_code
 
     def unpack(self, source, evalcode=False):
@@ -326,13 +350,20 @@ class Beautifier:
             return ''
 
     def trim_output(self, eat_newlines = False):
-        while len(self.output) \
+        self.trim_output_line(self.output_lines[-1])
+
+        while eat_newlines and len(self.output_lines) > 1 and \
+            len(self.output_lines[-1].text) == 0:
+            self.output_lines.pop()
+            self.trim_output_line(self.output_lines[-1])
+
+    def trim_output_line(self, line):
+        while len(line.text) \
               and (
-                  self.output[-1] == ' '\
-                  or self.output[-1] == self.indent_string \
-                  or self.output[-1] == self.preindent_string \
-                  or (eat_newlines and self.output[-1] in ['\n', '\r'])):
-            self.output.pop()
+                  line.text[-1] == ' '\
+                  or line.text[-1] == self.indent_string \
+                  or line.text[-1] == self.preindent_string):
+            line.text.pop()
 
     def is_special_word(self, s):
         return s in ['case', 'return', 'do', 'if', 'throw', 'else']
@@ -345,27 +376,27 @@ class Beautifier:
         return mode in [MODE.Expression, MODE.ForInitializer, MODE.Conditional]
 
     def just_added_newline(self):
-        return len(self.output) and self.output[-1] == '\n'
+        line = self.output_lines[-1]
+        return len(line.text) == 0
 
-    def last_index(self, arr, find):
-        last_index = len(arr) - 1
-        while last_index >= 0:
-            if arr[last_index] == find:
-                break
-            else:
-                last_index -= 1
 
-        return last_index
+    def just_added_blankline(self):
+        if self.just_added_newline():
+            if len(self.output_lines) == 1:
+                return True
 
+            line = self.output_lines[-2]
+            return len(line.text) == 0
+
+        return False
 
     def allow_wrap_or_preserved_newline(self, token_text, force_linewrap = False):
         if self.opts.wrap_line_length > 0 and not force_linewrap:
-            start_line = self.last_index(self.output, '\n') + 1
+            line = self.output_lines[-1]
 
             # never wrap the first token of a line.
-            if start_line < len(self.output):
-                current_line = ''.join(self.output[start_line:])
-                proposed_line_length = len(current_line) + len(token_text)
+            if len(line.text) > 0:
+                proposed_line_length = len(''.join(line.text)) + len(token_text)
                 if self.output_space_before_token:
                     proposed_line_length += 1
 
@@ -374,8 +405,10 @@ class Beautifier:
 
         if ((self.opts.preserve_newlines and self.input_wanted_newline) or force_linewrap) and not self.just_added_newline():
             self.append_newline(preserve_statement_flags = True)
-            self.output_wrapped = True
-            self.input_wanted_newline = False
+
+            # Expressions and array literals already indent their contents.
+            if not (self.is_array(self.flags.mode) or self.is_expression(self.flags.mode)):
+                self.output_wrapped = True
 
 
     def append_newline(self, force_newline = False, preserve_statement_flags = False):
@@ -384,50 +417,54 @@ class Beautifier:
 
         if not preserve_statement_flags:
             if self.flags.last_text != ';':
-                while self.flags.mode == MODE.Statement and not self.flags.if_block:
+                while self.flags.mode == MODE.Statement and not self.flags.if_block and not self.flags.do_block:
                     self.restore_mode();
 
-        if self.flags.mode == MODE.ArrayLiteral:
-            self.flags.multiline_array = True
-
-
-        if len(self.output) == 0:
+        if len(self.output_lines) == 1 and self.just_added_newline():
             # no newline on start of file
             return
 
         if force_newline or not self.just_added_newline():
-            self.output.append('\n')
+            self.flags.multiline_frame = True
+            self.output_lines.append(OutputLine())
 
 
     def append_token_line_indentation(self):
         if self.just_added_newline():
-            if self.opts.keep_array_indentation and self.is_array(self.flags.mode) and len(self.whitespace_before_token) > 0:
-                self.output.append(''.join(self.whitespace_before_token))
+            line = self.output_lines[-1]
+            if self.opts.keep_array_indentation and self.is_array(self.flags.mode) and self.input_wanted_newline:
+                # prevent removing of this whitespace as redundant
+                line.text.append('');
+                for item in self.whitespace_before_token:
+                    line.text.append(item)
+
             else:
-                if self.preindent_string:
-                    self.output.append(self.preindent_string)
+                if self.preindent_string != '':
+                    line.text.append(self.preindent_string)
 
-                self.append_indent_string(self.flags.indentation_level)
-                self.append_indent_string(self.flags.var_line and self.flags.var_line_reindented)
-                self.append_indent_string(self.output_wrapped)
+                level = self.flags.indentation_level;
+                if self.flags.var_line and self.flags.var_line_reindented:
+                    level += 1
+                if self.output_wrapped:
+                    level += 1
+
+                self.append_indent_string(level)
 
 
-    def append_indent_string(self, level = 1):
-        if not isinstance(level, int):
-            if level:
-                level = 1
-            else:
-                level = 0
-
-        if self.flags.last_text != '':
+    def append_indent_string(self, level):
+        # Never indent your first output indent at the start of the file
+        if len(self.output_lines) > 1:
+            line = self.output_lines[-1]
+            self.flags.line_indent_level = level
             for i in range(level):
-                self.output.append(self.indent_string)
+                line.text.append(self.indent_string)
 
 
     def append_token_space_before(self):
         # make sure only single space gets drawn
-        if self.output_space_before_token and len(self.output) and self.output[-1] not in [' ', '\n', self.indent_string]:
-            self.output.append(' ')
+        line = self.output_lines[-1]
+        if self.output_space_before_token and len(line.text) and line.text[-1] not in [' ', self.indent_string]:
+            line.text.append(' ')
 
 
     def append_token(self, s):
@@ -435,12 +472,49 @@ class Beautifier:
         self.output_wrapped = False
         self.append_token_space_before()
         self.output_space_before_token = False
-        self.output.append(s)
+        self.output_lines[-1].text.append(s)
 
 
     def indent(self):
         self.flags.indentation_level += 1
 
+    def deindent(self):
+        allow_deindent = self.flags.indentation_level > 0 and ((self.flags.parent == None) or self.flags.indentation_level > self.flags.parent.indentation_level)
+
+        if allow_deindent:
+            self.flags.indentation_level -= 1
+
+    def remove_redundant_indentation(self, frame):
+        # This implementation is effective but has some issues:
+        #     - less than great performance due to array splicing
+        #     - can cause line wrap to happen too soon due to indent removal
+        #           after wrap points are calculated
+        # These issues are minor compared to ugly indentation.
+
+        if frame.multiline_frame:
+            return
+
+        # remove one indent from each line inside this section
+        index = frame.start_line_index
+        splice_index = 0
+        while index < len(self.output_lines):
+            line = self.output_lines[index]
+            index += 1
+
+            # skip empty lines
+            if len(line.text) == 0:
+                continue
+
+            # skip the preindent string if present
+            if self.preindent_string != '' and \
+                    line.text[0] == self.preindent_string:
+                splice_index = 1
+            else:
+                splice_index = 0
+
+            # remove one indent, if present
+            if line.text[splice_index] == self.indent_string:
+                del line.text[splice_index]
 
     def set_mode(self, mode):
         if self.flags:
@@ -450,7 +524,8 @@ class Beautifier:
             self.previous_flags = BeautifierFlags(mode)
 
         self.flags = BeautifierFlags(mode)
-        self.flags.apply_base(self.previous_flags);
+        self.flags.apply_base(self.previous_flags, self.just_added_newline());
+        self.flags.start_line_index = len(self.output_lines)
 
     def restore_mode(self):
         if len(self.flag_store) > 0:
@@ -461,10 +536,19 @@ class Beautifier:
         if (self.flags.last_text == 'do' \
                 or (self.flags.last_text == 'else' and self.token_text != 'if' ) \
                 or (self.last_type == 'TK_END_EXPR' and (self.previous_flags.mode == MODE.ForInitializer or self.previous_flags.mode == MODE.Conditional))):
-            self.allow_wrap_or_preserved_newline(self.token_text)
-            self.set_mode(MODE.Statement)
-            self.indent()
-            self.output_wrapped = False
+            # Issue #276:
+            # If starting a new statement with [if, for, while, do], push to a new line.
+            # if (a) if (b) if(c) d(); else e(); else f();
+            self.allow_wrap_or_preserved_newline(self.token_text, self.token_text in ['do', 'for', 'if', 'while']);
+
+            self.set_mode(MODE.Statement);
+            # Issue #275:
+            # If starting on a newline, all of a statement should be indented.
+            # if not, use line wrapping logic for indent.
+            if self.just_added_newline():
+                self.indent()
+                self.output_wrapped = False
+
             return True
         else:
             return False
@@ -583,13 +667,15 @@ class Beautifier:
 
                 return comment, 'TK_COMMENT'
 
-
-
         if c == "'" or c == '"' or \
-           (c == '/' and ((self.last_type == 'TK_WORD' and self.is_special_word(self.flags.last_text)) or \
-                          (self.last_type == 'TK_END_EXPR' and self.previous_flags.mode in [MODE.ForInitializer, MODE.Conditional]) or \
-                          (self.last_type in ['TK_COMMENT', 'TK_START_EXPR', 'TK_START_BLOCK', 'TK_END_BLOCK', 'TK_OPERATOR',
-                                              'TK_EQUALS', 'TK_EOF', 'TK_SEMICOLON', 'TK_COMMA']))):
+            ( \
+                (c == '/') or \
+                (self.opts.e4x and c == "<" and re.match('^<(!\[CDATA\[[\s\S]*?\]\]|[a-zA-Z:0-9]+|\{[^{}]*\})\s*([a-zA-Z:0-9]+=(\{[^{}]*\}|"[^"]*"|\'[^\']*\')\s*)*\/?\s*>', self.input[self.parser_pos - 1:])) \
+            ) and ( \
+                (self.last_type == 'TK_WORD' and self.is_special_word(self.flags.last_text)) or \
+                (self.last_type == 'TK_END_EXPR' and self.previous_flags.mode in [MODE.Conditional, MODE.ForInitializer]) or \
+                (self.last_type in ['TK_COMMENT', 'TK_START_EXPR', 'TK_START_BLOCK', 'TK_END_BLOCK', 'TK_OPERATOR', \
+                                   'TK_EQUALS', 'TK_EOF', 'TK_SEMICOLON', 'TK_COMMA'])):
             sep = c
             esc = False
             esc1 = 0
@@ -616,6 +702,38 @@ class Beautifier:
                             # incomplete regex when end-of-file reached
                             # bail out with what has received so far
                             return resulting_string, 'TK_STRING'
+
+                elif self.opts.e4x and sep == '<':
+                    # handle e4x xml literals
+                    xmlRegExp = re.compile('<(\/?)(!\[CDATA\[[\s\S]*?\]\]|[a-zA-Z:0-9]+|\{[^{}]*\})\s*([a-zA-Z:0-9]+=(\{[^{}]*\}|"[^"]*"|\'[^\']*\')\s*)*(\/?)\s*>')
+                    xmlStr = self.input[self.parser_pos - 1:]
+                    match = xmlRegExp.match(xmlStr)
+                    if match:
+                        rootTag = match.group(2)
+                        depth = 0
+                        while (match):
+                            isEndTag = match.group(1)
+                            tagName = match.group(2)
+                            isSingletonTag = (match.groups()[-1] != "") or (match.group(2)[0:8] == "![CDATA[")
+                            if tagName == rootTag and not isSingletonTag:
+                                if isEndTag:
+                                    depth -= 1
+                                else:
+                                    depth += 1
+
+                            if depth <= 0:
+                                break
+
+                            match = xmlRegExp.search(xmlStr, match.end())
+
+                        if match:
+                            xmlLength = match.end() # + len(match.group())
+                        else:
+                            xmlLength = len(xmlStr)
+
+                        self.parser_pos += xmlLength - 1
+                        return xmlStr[:xmlLength], 'TK_STRING'
+
                 else:
                     # handle string
                     while esc or self.input[self.parser_pos] != sep:
@@ -664,7 +782,8 @@ class Beautifier:
         if c == '#':
 
             # she-bang
-            if len(self.output) == 0 and len(self.input) > 1 and self.input[self.parser_pos] == '!':
+            if len(self.output_lines) == 1 and len(self.output_lines[0].text) == 0 and \
+                    len(self.input) > self.parser_pos and self.input[self.parser_pos] == '!':
                 resulting_string = c
                 while self.parser_pos < len(self.input) and c != '\n':
                     c = self.input[self.parser_pos]
@@ -733,15 +852,20 @@ class Beautifier:
             # The conditional starts the statement if appropriate.
             pass
 
+        next_mode = MODE.Expression
+
         if token_text == '[':
             if self.last_type == 'TK_WORD' or self.flags.last_text == ')':
                 if self.flags.last_text in self.line_starters:
                     self.output_space_before_token = True
-                self.set_mode(MODE.Expression)
+                self.set_mode(next_mode)
                 self.append_token(token_text)
+                self.indent()
                 if self.opts.space_in_paren:
                     self.output_space_before_token = True
                 return
+
+            next_mode = MODE.ArrayLiteral
 
             if self.is_array(self.flags.mode):
                 if self.flags.last_text == '[' or (
@@ -753,19 +877,21 @@ class Beautifier:
 
         else:
             if self.flags.last_text == 'for':
-                self.set_mode(MODE.ForInitializer)
+                next_mode = MODE.ForInitializer
             elif self.flags.last_text in ['if', 'while']:
-                self.set_mode(MODE.Conditional)
+                next_mode = MODE.Conditional
             else:
-                self.set_mode(MODE.Expression)
+                next_mode = MODE.Expression
 
 
         if self.flags.last_text == ';' or self.last_type == 'TK_START_BLOCK':
             self.append_newline()
         elif self.last_type in ['TK_END_EXPR', 'TK_START_EXPR', 'TK_END_BLOCK'] or self.flags.last_text == '.':
             # do nothing on (( and )( and ][ and ]( and .(
-            if self.input_wanted_newline:
-                self.append_newline()
+            # TODO: Consider whether forcing this is required.  Review failing tests when removed.
+            self.allow_wrap_or_preserved_newline(token_text, self.input_wanted_newline);
+            self.output_wrapped = False;
+
         elif self.last_type not in ['TK_WORD', 'TK_OPERATOR']:
             self.output_space_before_token = True
         elif self.flags.last_word == 'function' or self.flags.last_word == 'typeof':
@@ -780,15 +906,17 @@ class Beautifier:
         # a = (b &&
         #     (c || d));
         if self.last_type in ['TK_EQUALS', 'TK_OPERATOR']:
-            if self.flags.mode != 'OBJECT':
+            if self.flags.mode != MODE.ObjectLiteral:
                 self.allow_wrap_or_preserved_newline(token_text)
 
+        self.set_mode(next_mode)
         self.append_token(token_text)
+
         if self.opts.space_in_paren:
             self.output_space_before_token = True
-        if self.token_text == '[':
-            self.set_mode(MODE.ArrayLiteral)
-            self.indent()
+
+        # In all cases, if we newline while inside an expression it should be indented.
+        self.indent()
 
 
 
@@ -798,13 +926,23 @@ class Beautifier:
         while self.flags.mode == MODE.Statement:
             self.restore_mode()
 
-        if self.token_text == ']' and self.is_array(self.flags.mode) and self.flags.multiline_array and not self.opts.keep_array_indentation:
+        if self.token_text == ']' and self.is_array(self.flags.mode) and self.flags.multiline_frame and not self.opts.keep_array_indentation:
             self.append_newline()
 
-        self.restore_mode()
+        if self.flags.multiline_frame:
+            self.allow_wrap_or_preserved_newline(token_text)
+
         if self.opts.space_in_paren:
             self.output_space_before_token = True
-        self.append_token(token_text)
+
+        if self.token_text == ']' and self.opts.keep_array_indentation:
+            self.append_token(token_text)
+            self.restore_mode()
+        else:
+            self.restore_mode()
+            self.append_token(token_text)
+
+        self.remove_redundant_indentation(self.previous_flags);
 
         # do {} while () // no statement required after
         if self.flags.do_while and self.previous_flags.mode == MODE.Conditional:
@@ -850,8 +988,6 @@ class Beautifier:
         while self.flags.mode == MODE.Statement:
             self.restore_mode()
 
-        self.restore_mode()
-
         empty_braces = self.last_type == 'TK_START_BLOCK';
         if self.opts.brace_style == 'expand':
             if not empty_braces:
@@ -866,6 +1002,7 @@ class Beautifier:
                 else:
                     self.append_newline()
 
+        self.restore_mode()
         self.append_token(token_text)
 
 
@@ -904,19 +1041,25 @@ class Beautifier:
 
                 self.flags.if_block = False;
 
+        if token_text == 'case' or (token_text == 'default' and self.flags.in_case_statement):
+            self.append_newline()
+            if self.flags.case_body or self.opts.jslint_happy:
+                self.flags.case_body = False
+                self.deindent()
+            self.append_token(token_text)
+            self.flags.in_case = True
+            self.flags.in_case_statement = True
+            return
 
         if token_text == 'function':
             if self.flags.var_line and self.flags.last_text != '=':
                 self.flags.var_line_reindented = not self.opts.keep_function_indentation
-            if (self.just_added_newline() or self.flags.last_text == ';') and self.flags.last_text != '{' and not self.is_array(self.flags.mode):
+            if (self.just_added_newline() or self.flags.last_text == ';' or self.flags.last_text == '}') and \
+                    self.flags.last_text != '{' and not self.is_array(self.flags.mode):
                 # make sure there is a nice clean space of at least one blank line
                 # before a new function definition, except in arrays
-                have_newlines = self.n_newlines
-                if not self.just_added_newline():
-                    have_newlines = 0
-                if not self.opts.preserve_newlines:
-                    have_newlines = 1
-                for i in range(2 - have_newlines):
+                if not self.just_added_blankline():
+                    self.append_newline()
                     self.append_newline(True)
 
             if self.last_type == 'TK_WORD':
@@ -933,18 +1076,13 @@ class Beautifier:
             else:
                 self.append_newline()
 
+        if self.last_type in ['TK_COMMA', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']:
+            if self.flags.mode != MODE.ObjectLiteral:
+                self.allow_wrap_or_preserved_newline(token_text)
+
+        if token_text == 'function':
             self.append_token(token_text)
             self.flags.last_word = token_text
-            return
-
-        if token_text == 'case' or (token_text == 'default' and self.flags.in_case_statement):
-            self.append_newline()
-            if self.flags.case_body or self.opts.jslint_happy:
-                self.flags.case_body = False
-                self.flags.indentation_level -= 1
-            self.append_token(token_text)
-            self.flags.in_case = True
-            self.flags.in_case_statement = True
             return
 
         prefix = 'NONE'
@@ -979,10 +1117,6 @@ class Beautifier:
             else:
                 prefix = 'NEWLINE'
 
-        if self.last_type in ['TK_COMMA', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']:
-            if self.flags.mode != 'OBJECT':
-                self.allow_wrap_or_preserved_newline(token_text)
-
         if token_text in ['else', 'catch', 'finally']:
             if self.last_type != 'TK_END_BLOCK' \
                or self.opts.brace_style == 'expand' \
@@ -990,9 +1124,10 @@ class Beautifier:
                 self.append_newline()
             else:
                 self.trim_output(True)
+                line = self.output_lines[-1]
                 # If we trimmed and there's something other than a close block before us
                 # put a newline back in.  Handles '} // comment' scenario.
-                if self.output[-1] != '}':
+                if line.text[-1] != '}':
                     self.append_newline()
 
                 self.output_space_before_token = True
@@ -1038,13 +1173,17 @@ class Beautifier:
 
 
     def handle_semicolon(self, token_text):
-        while self.flags.mode == MODE.Statement and not self.flags.if_block:
+        if self.start_of_statement():
+            # The conditional starts the statement if appropriate.
+            # Semicolon can be the start (and end) of a statement
+            self.output_space_before_token = False
+        while self.flags.mode == MODE.Statement and not self.flags.if_block and not self.flags.do_block:
             self.restore_mode()
 
         self.append_token(token_text)
         self.flags.var_line = False
         self.flags.var_line_reindented = False
-        if self.flags.mode == 'OBJECT':
+        if self.flags.mode == MODE.ObjectLiteral:
             # OBJECT mode is weird and doesn't get reset too well.
             self.flags.mode = MODE.BlockStatement
 
@@ -1056,10 +1195,8 @@ class Beautifier:
             self.output_space_before_token = True
         elif self.last_type == 'TK_WORD':
             self.output_space_before_token = True
-        elif self.last_type == 'TK_END_EXPR' and self.previous_flags.mode in [MODE.Conditional, MODE.ForInitializer]:
-            self.output_space_before_token = True
         elif self.last_type in ['TK_COMMA', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']:
-            if self.flags.mode != 'OBJECT':
+            if self.flags.mode != MODE.ObjectLiteral:
                 self.allow_wrap_or_preserved_newline(token_text)
         else:
             self.append_newline()
@@ -1098,12 +1235,12 @@ class Beautifier:
 
         if self.last_type == 'TK_END_BLOCK' and self.flags.mode != MODE.Expression:
             self.append_token(token_text)
-            if self.flags.mode == 'OBJECT' and self.flags.last_text == '}':
+            if self.flags.mode == MODE.ObjectLiteral and self.flags.last_text == '}':
                 self.append_newline()
             else:
                 self.output_space_before_token = True
         else:
-            if self.flags.mode == 'OBJECT':
+            if self.flags.mode == MODE.ObjectLiteral:
                 self.append_token(token_text)
                 self.append_newline()
             else:
@@ -1171,7 +1308,7 @@ class Beautifier:
         elif token_text == ':':
             if self.flags.ternary_depth == 0:
                 if self.flags.mode == MODE.BlockStatement:
-                    self.flags.mode = 'OBJECT'
+                    self.flags.mode = MODE.ObjectLiteral
                 space_before = False
             else:
                 self.flags.ternary_depth -= 1
@@ -1189,33 +1326,27 @@ class Beautifier:
 
 
     def handle_block_comment(self, token_text):
-
         lines = token_text.replace('\x0d', '').split('\x0a')
-        # all lines start with an asterisk? that's a proper box comment
-        if not any(l for l in lines[1:] if ( l.strip() == '' or (l.lstrip())[0] != '*')):
+        javadoc = False
+
+        # block comment starts with a new line
+        self.append_newline(preserve_statement_flags = True)
+        if  len(lines) > 1:
+            if not any(l for l in lines[1:] if ( l.strip() == '' or (l.lstrip())[0] != '*')):
+                javadoc = True
+
+        # first line always indented
+        self.append_token(lines[0])
+        for line in lines[1:]:
             self.append_newline(preserve_statement_flags = True)
-            self.append_token(lines[0])
-            for line in lines[1:]:
-                self.append_newline(preserve_statement_flags = True)
+            if javadoc:
+                # javadoc: reformat and re-indent
                 self.append_token(' ' + line.strip())
-        else:
-            # simple block comment: leave intact
-            if len(lines) > 1:
-                # multiline comment starts on a new line
-                self.append_newline(preserve_statement_flags = True)
             else:
-                # single line /* ... */ comment stays on the same line
-                self.output_space_before_token = True
+                # normal comments output raw
+                self.output_lines[-1].text.append(line)
 
-            self.append_token(lines[0])
-            self.output.append('\n')
-            for line in lines[1:]:
-                self.output.append(line)
-                self.output.append('\n')
-
-        if not self.is_next('\n'):
-            self.append_newline(preserve_statement_flags = True)
-
+        self.append_newline(preserve_statement_flags = True)
 
     def handle_inline_comment(self, token_text):
         self.output_space_before_token = True
@@ -1252,7 +1383,13 @@ class Beautifier:
             self.append_newline()
 
 
-
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
 
 
 def main():
@@ -1260,11 +1397,11 @@ def main():
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv, "s:c:o:dPjbkil:xhtfv",
+        opts, args = getopt.getopt(argv, "s:c:o:dPjbkil:xhtfvXw:",
             ['indent-size=','indent-char=','outfile=', 'disable-preserve-newlines',
             'space-in-paren', 'jslint-happy', 'brace-style=', 'keep-array-indentation',
             'indent-level=', 'unescape-strings', 'help', 'usage', 'stdin', 'eval-code',
-            'indent-with-tabs', 'keep-function-indentation', 'version'])
+            'indent-with-tabs', 'keep-function-indentation', 'version', 'e4x', 'wrap-line-length'])
     except getopt.GetoptError as ex:
         print(ex, file=sys.stderr)
         return usage(sys.stderr)
@@ -1289,7 +1426,7 @@ def main():
             js_options.indent_char = arg
         elif opt in ('--indent-with-tabs', '-t'):
             js_options.indent_with_tabs = True
-        elif opt in ('--disable-preserve_newlines', '-d'):
+        elif opt in ('--disable-preserve-newlines', '-d'):
             js_options.preserve_newlines = False
         elif opt in ('--space-in-paren', '-P'):
             js_options.space_in_paren = True
@@ -1301,6 +1438,8 @@ def main():
             js_options.brace_style = arg
         elif opt in ('--unescape-strings', '-x'):
             js_options.unescape_strings = True
+        elif opt in ('--e4x', '-X'):
+            js_options.e4x = True
         elif opt in ('--wrap-line-length ', '-w'):
             js_options.wrap_line_length = int(arg)
         elif opt in ('--stdin', '-i'):
@@ -1319,6 +1458,7 @@ def main():
             if outfile == 'stdout':
                 print(beautify_file(file, js_options))
             else:
+                mkdir_p(os.path.dirname(outfile))
                 with open(outfile, 'w') as f:
                     f.write(beautify_file(file, js_options) + '\n')
         except Exception as ex:
