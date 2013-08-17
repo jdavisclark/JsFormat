@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, re, sys, os
+import sublime, sublime_plugin, re, sys, os, json
 
 directory = os.path.dirname(os.path.realpath(__file__))
 libs_path = os.path.join(directory, "libs")
@@ -58,6 +58,63 @@ def is_js_buffer(view):
 
 	return ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
 
+def get_rc_paths(cwd):
+	result = []
+	subs = cwd.split('/')
+	fullPath = ""
+
+	for value in subs:
+		fullPath += value + '/'
+		result.append(fullPath + '.jsbeautifyrc')
+
+	return result
+
+def filter_existing_files(paths):
+	result = []
+
+	for value in paths:
+		if (os.path.isfile(value)):
+			result.append(value)
+
+	return result
+
+def read_json(file):
+	f = open(file, 'r');
+	result = json.load(f);
+
+	f.close();
+
+	return result
+
+def augment_options(options, subset):
+	options.indent_char = subset.get("indent_char") or options.indent_char
+	options.indent_size = subset.get("indent_size") or options.indent_size
+	options.max_preserve_newlines = subset.get("max_preserve_newlines") or options.max_preserve_newlines
+	options.preserve_newlines = subset.get("preserve_newlines") or options.preserve_newlines
+	options.space_in_paren = subset.get("space_in_paren") or options.space_in_paren
+	options.jslint_happy = subset.get("jslint_happy") or options.jslint_happy
+	options.brace_style = subset.get("brace_style") or options.brace_style
+	options.keep_array_indentation = subset.get("keep_array_indentation") or options.keep_array_indentation
+	options.keep_function_indentation = subset.get("keep_function_indentation") or options.keep_function_indentation
+	options.indent_with_tabs = subset.get("indent_with_tabs") or options.indent_with_tabs
+	options.eval_code = subset.get("eval_code") or options.eval_code
+	options.unescape_strings = subset.get("unescape_strings") or options.unescape_strings
+	options.break_chained_methods = subset.get("break_chained_methods") or options.break_chained_methods
+
+	return options
+
+
+def augment_options_by_rc_files(options, view):
+	fileName = view.file_name()
+
+	if (fileName != None):
+		files = filter_existing_files(get_rc_paths(os.path.dirname(fileName)))
+		for value in files:
+			jsonOptions = read_json(value)
+			options = augment_options(options, jsonOptions)
+
+	return options
+
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
 	def on_pre_save(self, view):
@@ -73,17 +130,8 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts = jsbeautifier.default_options()
 		opts.indent_char = " " if settings.get("translate_tabs_to_spaces") else "\t"
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
-		opts.max_preserve_newlines = s.get("max_preserve_newlines") or 3
-		opts.preserve_newlines = s.get("preserve_newlines") or True
-		opts.space_in_paren = s.get("space_in_paren") or False
-		opts.jslint_happy = s.get("jslint_happy") or False
-		opts.brace_style = s.get("brace_style") or "collapse"
-		opts.keep_array_indentation = s.get("keep_array_indentation") or False
-		opts.keep_function_indentation = s.get("keep_function_indentation") or False
-		opts.indent_with_tabs = s.get("indent_with_tabs") or False
-		opts.eval_code = s.get("eval_code") or False
-		opts.unescape_strings = s.get("unescape_strings") or False
-		opts.break_chained_methods = s.get("break_chained_methods") or False
+		opts = augment_options(opts, s)
+		opts = augment_options_by_rc_files(opts, self.view)
 
 		selection = self.view.sel()[0]
 		formatSelection = False
