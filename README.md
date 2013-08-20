@@ -1,6 +1,6 @@
 ## Summary
-JsFormat is a javascipt formatting plugin for Sublime Text 2.
-It uses the commandline/python-module javascript formatter from http://jsbeautifier.org/ to format whole js or json files, or the selected portion(s).
+JsFormat is a javascript formatting plugin for Sublime Text 2.
+It uses the command-line/python-module javascript formatter from http://jsbeautifier.org/ to format whole js or json files, or the selected portion(s).
 
 
 ## Features
