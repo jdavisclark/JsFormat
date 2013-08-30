@@ -84,6 +84,8 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts.eval_code = s.get("eval_code") or False
 		opts.unescape_strings = s.get("unescape_strings") or False
 		opts.break_chained_methods = s.get("break_chained_methods") or False
+		opts.e4x = s.get("e4x") or False
+		opts.wrap_line_length = s.get("wrap_line_length") or 0
 
 		selection = self.view.sel()[0]
 		formatSelection = False
