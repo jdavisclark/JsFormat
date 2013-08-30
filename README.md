@@ -26,6 +26,8 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "unescape_strings": false,
 * "break_chained_methods": false*
 * "format_on_save": false
+* "e4x": false
+* "wrap_line_length": 0
 
 I had temporary lapse of judgement a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
 was added from that pull request has been lost; ```"ensure_space_before_linestarters"``` is no longer supported.
