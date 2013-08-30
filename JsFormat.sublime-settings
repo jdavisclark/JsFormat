@@ -13,5 +13,8 @@
 	"break_chained_methods": false,
 
 	// jsformat options
-	"format_on_save": false
+	"format_on_save": false,
+	"format_by_extension_syntax": "both",
+	"format_file_extension": ["js", "json"],
+	"format_file_syntax": ["javascript", "json"]
 }

@@ -26,6 +26,9 @@ In addition, the following settings are available in JsFormat/JsFormat.sublime-s
 * "unescape_strings": false,
 * "break_chained_methods": false*
 * "format_on_save": false
+* "format_by_extension_syntax": "both"  (both, extension, syntax)
+* "format_file_extension": ["js", "json"]
+* "format_file_syntax": ["javascript", "json"]
 
 I had temporary lapse of judgement a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
 was added from that pull request has been lost; ```"ensure_space_before_linestarters"``` is no longer supported.
