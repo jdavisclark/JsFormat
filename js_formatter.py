@@ -134,6 +134,8 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
 		opts = augment_options(opts, s)
 		opts = augment_options_by_rc_files(opts, self.view)
+		opts.e4x = s.get("e4x") or False
+		opts.wrap_line_length = s.get("wrap_line_length") or 0
 
 		selection = self.view.sel()[0]
 		formatSelection = False
