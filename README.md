@@ -6,33 +6,49 @@ It uses the command-line/python-module javascript formatter from http://jsbeauti
 ## Features
 * javascript/json formatting (obviously)
 * all settings are customizable (whitespace, formatting style, etc..)
+* .jsbeautifyrc settings files support for even more control on a per-project basis
 * puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
-* Sublime Text 3 support (as much as we can support alpha/beta software)
-
+* Sublime Text 3 support
 ## Settings
-JsFormat uses whatever tab/indent settings are configured with the standard "translate_tabs_to_spaces" and "tab_size" sublime settings.
+JsFormat uses whatever tab/indent settings are configured with the standard ```translate_tabs_to_spaces``` and ```tab_size``` sublime settings.
 
-In addition, the following settings are available in JsFormat/JsFormat.sublime-settings (defaults shown below):
+The following **JsBeautifier** settings are available in JsFormat/JsFormat.sublime-settings (defaults shown below):
 
-* "indent_with_tabs": false
-* "max_preserve_newlines": 4
-* "preserve_newlines": true
-* "space_in_paren": false
-* "jslint_happy": false
-* "brace_style": "collapse"
-* "keep_array_indentation": false
-* "keep_function_indentation": false
-* "eval_code": false,
-* "unescape_strings": false,
-* "break_chained_methods": false*
-* "format_on_save": false
-* "e4x": false
-* "wrap_line_length": 0
+* `indent_with_tabs`: false
+* `max_preserve_newlines`: 4
+* `preserve_newlines`: true
+* `space_in_paren`: false
+* `jslint_happy`: false
+* `brace_style`: "collapse"
+* `keep_array_indentation`: false
+* `keep_function_indentation`: false
+* `eval_code`: false,
+* `unescape_strings`: false,
+* `break_chained_methods`: false*
+* `e4x`: false
+* `wrap_line_length`: 0
 
-I had temporary lapse of judgement a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
+The following **JsFormat** specific settings are also exposed:
+
+- `format_on_save`: false  (format files on buffer save)
+- `jsbeautifyrc_files`: false (see the [.jsbeautifyrc files](#jsbeautifyrc) section)
+
+I had temporary lapse of judgment a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
 was added from that pull request has been lost; ```"ensure_space_before_linestarters"``` is no longer supported.
 
 The JsFormat specific ```ensure_newline_at_eof_on_save``` setting has also been removed. This functionality exists in sublime core.
+
+#### <a id="jsbeautifyrc">.jsbeautifyrc files</a>
+JsFormat now supports `.jsbeautifyrc` JSON files, which themselves support any of the exposed JsBeautifier options. The option augmentation order is: default options -> user settings -> `.jsbeautifyrc` option files. 
+
+A hierarchy of `.jsbeautifyrc` files is supported, where rc files at the deeper levels override the settings from rc files at higher levels. For example, given the file structure listed below, formatting `/home/you/myProject/app.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc`, while formatting `/home/you/myProject/tests/test.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc` -> `/home/you/myProject/tests/.jsbeautifyrc` 
+
+- /home/you/myProject/.jsbeautifyrc
+- /home/you/myProject/app.js
+- /home/you/myProject/tests/.jsbeautifyrc
+- /home/you/myProject/tests/test.js  
+
+
 
 ## Install
 #### [Package Control](https://github.com/wbond/sublime_package_control) (Recommended)
