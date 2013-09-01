@@ -86,22 +86,28 @@ def read_json(file):
 
 	return result
 
+def coalesce(*arg):
+	for el in arg:
+		if el is not None:
+		  return el
+	return None
+
 def augment_options(options, subset):
-	options.indent_char = subset.get("indent_char") or options.indent_char
-	options.indent_size = subset.get("indent_size") or options.indent_size
-	options.max_preserve_newlines = subset.get("max_preserve_newlines") or options.max_preserve_newlines
-	options.preserve_newlines = subset.get("preserve_newlines") or options.preserve_newlines
-	options.space_in_paren = subset.get("space_in_paren") or options.space_in_paren
-	options.jslint_happy = subset.get("jslint_happy") or options.jslint_happy
-	options.brace_style = subset.get("brace_style") or options.brace_style
-	options.keep_array_indentation = subset.get("keep_array_indentation") or options.keep_array_indentation
-	options.keep_function_indentation = subset.get("keep_function_indentation") or options.keep_function_indentation
-	options.indent_with_tabs = subset.get("indent_with_tabs") or options.indent_with_tabs
-	options.eval_code = subset.get("eval_code") or options.eval_code
-	options.unescape_strings = subset.get("unescape_strings") or options.unescape_strings
-	options.break_chained_methods = subset.get("break_chained_methods") or options.break_chained_methods
-	options.e4x = subset.get("e4x") or options.e4x
-	options.wrap_line_length = subset.get("wrap_line_length") or options.wrap_line_length
+	options.indent_char =  coalesce(subset.get("indent_char"), options.indent_char)
+	options.indent_size = coalesce(subset.get("indent_size"), options.indent_size)
+	options.max_preserve_newlines = coalesce(subset.get("max_preserve_newlines"), options.max_preserve_newlines)
+	options.preserve_newlines = coalesce(subset.get("preserve_newlines"), options.preserve_newlines)
+	options.space_in_paren = coalesce(subset.get("space_in_paren"), options.space_in_paren)
+	options.jslint_happy = coalesce(subset.get("jslint_happy"), options.jslint_happy)
+	options.brace_style = coalesce(subset.get("brace_style"), options.brace_style)
+	options.keep_array_indentation = coalesce(subset.get("keep_array_indentation"), options.keep_array_indentation)
+	options.keep_function_indentation = coalesce(subset.get("keep_function_indentation"), options.keep_function_indentation)
+	options.indent_with_tabs = coalesce(subset.get("indent_with_tabs"), options.indent_with_tabs)
+	options.eval_code = coalesce(subset.get("eval_code"), options.eval_code)
+	options.unescape_strings = coalesce(subset.get("unescape_strings"), options.unescape_strings)
+	options.break_chained_methods = coalesce(subset.get("break_chained_methods"), options.break_chained_methods)
+	options.e4x = coalesce(subset.get("e4x"), options.e4x)
+	options.wrap_line_length = coalesce(subset.get("wrap_line_length"), options.wrap_line_length)
 
 	return options
 
@@ -134,8 +140,8 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
 		opts = augment_options(opts, s)
 		opts = augment_options_by_rc_files(opts, self.view)
-		opts.e4x = s.get("e4x") or False
-		opts.wrap_line_length = s.get("wrap_line_length") or 0
+		opts.e4x = coalesce(s.get("e4x"), False)
+		opts.wrap_line_length = coalesce(s.get("wrap_line_length"), 0)
 
 		selection = self.view.sel()[0]
 		formatSelection = False
