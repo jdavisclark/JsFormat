@@ -78,11 +78,16 @@ def filter_existing_files(paths):
 
 	return result
 
-def read_json(file):
-	f = open(file, 'r');
-	result = json.load(f);
+def read_json(path):
+	f = open(path, 'r');
+	result = None
 
-	f.close();
+	try:
+		result = json.load(f);
+	except:
+		sublime.error_message("JsFormat Error.\nInvalid JSON: " + path)
+	finally:
+		f.close();
 
 	return result
 
