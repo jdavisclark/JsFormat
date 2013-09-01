@@ -100,6 +100,8 @@ def augment_options(options, subset):
 	options.eval_code = subset.get("eval_code") or options.eval_code
 	options.unescape_strings = subset.get("unescape_strings") or options.unescape_strings
 	options.break_chained_methods = subset.get("break_chained_methods") or options.break_chained_methods
+	options.e4x = subset.get("e4x") or options.e4x
+	options.wrap_line_length = subset.get("wrap_line_length") or options.wrap_line_length
 
 	return options
 
