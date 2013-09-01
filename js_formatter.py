@@ -60,11 +60,11 @@ def is_js_buffer(view):
 
 def get_rc_paths(cwd):
 	result = []
-	subs = cwd.split('/')
+	subs = cwd.split(os.sep)
 	fullPath = ""
 
 	for value in subs:
-		fullPath += value + '/'
+		fullPath += value + os.sep
 		result.append(fullPath + '.jsbeautifyrc')
 
 	return result
