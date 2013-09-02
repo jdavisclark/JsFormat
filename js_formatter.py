@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, re, sys, os
+import sublime, sublime_plugin, re, sys, os, json
 
 directory = os.path.dirname(os.path.realpath(__file__))
 libs_path = os.path.join(directory, "libs")
@@ -58,6 +58,66 @@ def is_js_buffer(view):
 
 	return ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
 
+def get_rc_paths(cwd):
+	result = []
+	subs = cwd.split(os.sep)
+	fullPath = ""
+
+	for value in subs:
+		fullPath += value + os.sep
+		result.append(fullPath + '.jsbeautifyrc')
+
+	return result
+
+def filter_existing_files(paths):
+	result = []
+
+	for value in paths:
+		if (os.path.isfile(value)):
+			result.append(value)
+
+	return result
+
+def read_json(path):
+	f = open(path, 'r');
+	result = None
+
+	try:
+		result = json.load(f);
+	except:
+		sublime.error_message("JsFormat Error.\nInvalid JSON: " + path)
+	finally:
+		f.close();
+
+	return result
+
+
+def augment_options(options, subset):
+	"""	augment @options with defined values in @subset
+
+		options -- a regular old class with public attributes
+	   	subset -- anything with a 'get' callable (json style)
+	"""
+	fields = [attr for attr in dir(options) if not callable(getattr(options, attr)) and not attr.startswith("__")]
+
+	for field in fields:
+		value = subset.get(field)
+		if value != None:
+			setattr(options, field, value)
+
+	return options
+
+def augment_options_by_rc_files(options, view):
+	fileName = view.file_name()
+
+	if (fileName != None):
+		files = filter_existing_files(get_rc_paths(os.path.dirname(fileName)))
+		for value in files:
+			jsonOptions = read_json(value)
+			options = augment_options(options, jsonOptions)
+
+	return options
+
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
 	def on_pre_save(self, view):
@@ -73,19 +133,10 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts = jsbeautifier.default_options()
 		opts.indent_char = " " if settings.get("translate_tabs_to_spaces") else "\t"
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
-		opts.max_preserve_newlines = s.get("max_preserve_newlines") or 3
-		opts.preserve_newlines = s.get("preserve_newlines") or True
-		opts.space_in_paren = s.get("space_in_paren") or False
-		opts.jslint_happy = s.get("jslint_happy") or False
-		opts.brace_style = s.get("brace_style") or "collapse"
-		opts.keep_array_indentation = s.get("keep_array_indentation") or False
-		opts.keep_function_indentation = s.get("keep_function_indentation") or False
-		opts.indent_with_tabs = s.get("indent_with_tabs") or False
-		opts.eval_code = s.get("eval_code") or False
-		opts.unescape_strings = s.get("unescape_strings") or False
-		opts.break_chained_methods = s.get("break_chained_methods") or False
-		opts.e4x = s.get("e4x") or False
-		opts.wrap_line_length = s.get("wrap_line_length") or 0
+		opts = augment_options(opts, s)
+
+		if(s.get("jsbeautifyrc_files") == True):
+			opts = augment_options_by_rc_files(opts, self.view)
 
 		selection = self.view.sel()[0]
 		formatSelection = False
