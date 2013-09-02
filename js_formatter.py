@@ -91,31 +91,15 @@ def read_json(path):
 
 	return result
 
-def coalesce(*arg):
-	for el in arg:
-		if el is not None:
-		  return el
-	return None
-
 def augment_options(options, subset):
-	options.indent_char =  coalesce(subset.get("indent_char"), options.indent_char)
-	options.indent_size = coalesce(subset.get("indent_size"), options.indent_size)
-	options.max_preserve_newlines = coalesce(subset.get("max_preserve_newlines"), options.max_preserve_newlines)
-	options.preserve_newlines = coalesce(subset.get("preserve_newlines"), options.preserve_newlines)
-	options.space_in_paren = coalesce(subset.get("space_in_paren"), options.space_in_paren)
-	options.jslint_happy = coalesce(subset.get("jslint_happy"), options.jslint_happy)
-	options.brace_style = coalesce(subset.get("brace_style"), options.brace_style)
-	options.keep_array_indentation = coalesce(subset.get("keep_array_indentation"), options.keep_array_indentation)
-	options.keep_function_indentation = coalesce(subset.get("keep_function_indentation"), options.keep_function_indentation)
-	options.indent_with_tabs = coalesce(subset.get("indent_with_tabs"), options.indent_with_tabs)
-	options.eval_code = coalesce(subset.get("eval_code"), options.eval_code)
-	options.unescape_strings = coalesce(subset.get("unescape_strings"), options.unescape_strings)
-	options.break_chained_methods = coalesce(subset.get("break_chained_methods"), options.break_chained_methods)
-	options.e4x = coalesce(subset.get("e4x"), options.e4x)
-	options.wrap_line_length = coalesce(subset.get("wrap_line_length"), options.wrap_line_length)
+	fields = [attr for attr in dir(options) if not callable(attr) and not attr.startswith("__")]
+
+	for field in fields:
+		value = subset.get(field)
+		if value != None:
+			setattr(options, field, value)
 
 	return options
-
 
 def augment_options_by_rc_files(options, view):
 	fileName = view.file_name()
