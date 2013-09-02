@@ -91,8 +91,14 @@ def read_json(path):
 
 	return result
 
+
 def augment_options(options, subset):
-	fields = [attr for attr in dir(options) if not callable(attr) and not attr.startswith("__")]
+	"""	augment @options with defined values in @subset
+
+		options -- a regular old class with public attributes
+	   	subset -- anything with a 'get' callable (json style)
+	"""
+	fields = [attr for attr in dir(options) if not callable(getattr(options, attr)) and not attr.startswith("__")]
 
 	for field in fields:
 		value = subset.get(field)
