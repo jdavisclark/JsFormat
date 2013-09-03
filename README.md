@@ -9,6 +9,8 @@ It uses the command-line/python-module javascript formatter from http://jsbeauti
 * .jsbeautifyrc settings files support for even more control on a per-project basis
 * puts the cursor back in the same location it was before formatting (accounts for whitespace/newline changes)
 * Sublime Text 3 support
+
+
 ## Settings
 JsFormat uses whatever tab/indent settings are configured with the standard ```translate_tabs_to_spaces``` and ```tab_size``` sublime settings.
 
