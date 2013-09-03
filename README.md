@@ -39,7 +39,7 @@ was added from that pull request has been lost; ```"ensure_space_before_linestar
 The JsFormat specific ```ensure_newline_at_eof_on_save``` setting has also been removed. This functionality exists in sublime core.
 
 #### jsbeautifyrc files ####
-JsFormat now supports `.jsbeautifyrc` JSON files, which themselves support any of the exposed JsBeautifier options. The option augmentation order is: default options -> user settings -> `.jsbeautifyrc` option files. 
+JsFormat now supports `.jsbeautifyrc` JSON files (disabled by default), which themselves support any of the exposed JsBeautifier options. The option augmentation order is: default options -> user settings -> `.jsbeautifyrc` option files. 
 
 A hierarchy of `.jsbeautifyrc` files is supported, where rc files at the deeper levels override the settings from rc files at higher levels. For example, given the file structure listed below, formatting `/home/you/myProject/app.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc`, while formatting `/home/you/myProject/tests/test.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc` -> `/home/you/myProject/tests/.jsbeautifyrc` 
 
