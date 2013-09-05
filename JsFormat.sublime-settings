@@ -11,7 +11,10 @@
 	"eval_code": false,
 	"unescape_strings": false,
 	"break_chained_methods": false,
+	"e4x": false,
+	"wrap_line_length": 0,
 
 	// jsformat options
-	"format_on_save": false
+	"format_on_save": false,
+	"jsbeautifyrc_files": false
 }

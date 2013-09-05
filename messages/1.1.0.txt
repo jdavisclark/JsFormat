@@ -1,0 +1,3 @@
+JsFormat v1.1.0 changelog:
+- Added support for .jsbeautifyrc files. Allows for per-project settings without constantly having to change the JsFormat uset settings.
+For more info, check out the relevant section of the documentation: https://github.com/jdc0589/JsFormat#jsbeautifyrc-files
