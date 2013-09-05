@@ -118,10 +118,16 @@ def augment_options_by_rc_files(options, view):
 
 	return options
 
+def get_plugin_setting(view, name):
+	"""Return a plugin setting identified by @name from either user settings or project settings"""
+	project_settings = view.settings().get("JsFormat", s)
+
+	return project_settings.get(name, s.get(name))
+
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
 	def on_pre_save(self, view):
-		if(s.get("format_on_save") == True and is_js_buffer(view)):
+		if(get_plugin_setting(view, "format_on_save") == True and is_js_buffer(view)):
 			view.run_command("js_format")
 
 
@@ -135,7 +141,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 		opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
 		opts = augment_options(opts, s)
 
-		if(s.get("jsbeautifyrc_files") == True):
+		if(get_plugin_setting(self.view, "jsbeautifyrc_files") == True):
 			opts = augment_options_by_rc_files(opts, self.view)
 
 		selection = self.view.sel()[0]
