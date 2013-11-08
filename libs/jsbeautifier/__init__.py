@@ -127,6 +127,7 @@ class BeautifierFlags:
         self.line_indent_level = 0
         self.start_line_index = 0
         self.ternary_depth = 0
+        self.had_comment = False
 
     def apply_base(self, flags_base, added_newline):
         next_indent_level = flags_base.indentation_level;
@@ -328,10 +329,11 @@ class Beautifier:
 
             # The cleanest handling of inline comments is to treat them as though they aren't there.
             # Just continue formatting and the behavior should be logical.
-            if token_type != 'TK_INLINE_COMMENT' and token_type != 'TK_COMMENT' and token_type != 'TK_UNKNOWN':
+            if token_type != 'TK_INLINE_COMMENT' and token_type != 'TK_COMMENT' and token_type != 'TK_BLOCK_COMMENT' and token_type != 'TK_UNKNOWN':
                 self.last_last_text = self.flags.last_text
                 self.last_type = token_type
                 self.flags.last_text = self.token_text
+            self.flags.had_comment = token_type in ['TK_COMMENT', 'TK_INLINE_COMMENT', 'TK_BLOCK_COMMENT']
 
         sweet_code = ''.join(self.output_lines[0].text)
         if len(self.output_lines) > 1:
@@ -532,6 +534,10 @@ class Beautifier:
             self.previous_flags = self.flags
             self.flags = self.flag_store.pop()
 
+    def start_of_object_property(self):
+        return self.flags.mode == MODE.ObjectLiteral and self.flags.last_text == ':' and \
+            self.flags.ternary_depth == 0
+
     def start_of_statement(self):
         if (self.flags.last_text == 'do' \
                 or (self.flags.last_text == 'else' and self.token_text != 'if' ) \
@@ -670,7 +676,7 @@ class Beautifier:
         if c == "'" or c == '"' or \
             ( \
                 (c == '/') or \
-                (self.opts.e4x and c == "<" and re.match('^<(!\[CDATA\[[\s\S]*?\]\]|[a-zA-Z:0-9]+|\{[^{}]*\})\s*([a-zA-Z:0-9]+=(\{[^{}]*\}|"[^"]*"|\'[^\']*\')\s*)*\/?\s*>', self.input[self.parser_pos - 1:])) \
+                (self.opts.e4x and c == "<" and re.match('^<(!\[CDATA\[[\s\S]*?\]\]|[-a-zA-Z:0-9_.]+|\{[^{}]*\})\s*([-a-zA-Z:0-9_.]+=(\{[^{}]*\}|"[^"]*"|\'[^\']*\')\s*)*\/?\s*>', self.input[self.parser_pos - 1:])) \
             ) and ( \
                 (self.last_type == 'TK_WORD' and self.is_special_word(self.flags.last_text)) or \
                 (self.last_type == 'TK_END_EXPR' and self.previous_flags.mode in [MODE.Conditional, MODE.ForInitializer]) or \
@@ -705,7 +711,7 @@ class Beautifier:
 
                 elif self.opts.e4x and sep == '<':
                     # handle e4x xml literals
-                    xmlRegExp = re.compile('<(\/?)(!\[CDATA\[[\s\S]*?\]\]|[a-zA-Z:0-9]+|\{[^{}]*\})\s*([a-zA-Z:0-9]+=(\{[^{}]*\}|"[^"]*"|\'[^\']*\')\s*)*(\/?)\s*>')
+                    xmlRegExp = re.compile('<(\/?)(!\[CDATA\[[\s\S]*?\]\]|[-a-zA-Z:0-9_.]+|\{[^{}]*\})\s*([-a-zA-Z:0-9_.]+=(\{[^{}]*\}|"[^"]*"|\'[^\']*\')\s*)*(\/?)\s*>')
                     xmlStr = self.input[self.parser_pos - 1:]
                     match = xmlRegExp.match(xmlStr)
                     if match:
@@ -906,7 +912,7 @@ class Beautifier:
         # a = (b &&
         #     (c || d));
         if self.last_type in ['TK_EQUALS', 'TK_OPERATOR']:
-            if self.flags.mode != MODE.ObjectLiteral:
+            if not self.start_of_object_property():
                 self.allow_wrap_or_preserved_newline(token_text)
 
         self.set_mode(next_mode)
@@ -933,7 +939,12 @@ class Beautifier:
             self.allow_wrap_or_preserved_newline(token_text)
 
         if self.opts.space_in_paren:
-            self.output_space_before_token = True
+            if self.last_type == 'TK_START_EXPR':
+                # empty parens are always "()" and "[]", not "( )" or "[ ]"
+                self.output_space_before_token = False
+                self.trim_output()
+            else:
+                self.output_space_before_token = True
 
         if self.token_text == ']' and self.opts.keep_array_indentation:
             self.append_token(token_text)
@@ -1054,11 +1065,11 @@ class Beautifier:
         if token_text == 'function':
             if self.flags.var_line and self.flags.last_text != '=':
                 self.flags.var_line_reindented = not self.opts.keep_function_indentation
-            if (self.just_added_newline() or self.flags.last_text == ';' or self.flags.last_text == '}') and \
-                    self.flags.last_text != '{' and not self.is_array(self.flags.mode):
+
+            if self.flags.last_text in ['}', ';'] or (self.just_added_newline() and not self.flags.last_text in ['{', ':', '=', ',']):
                 # make sure there is a nice clean space of at least one blank line
                 # before a new function definition, except in arrays
-                if not self.just_added_blankline():
+                if not self.just_added_blankline() and not self.flags.had_comment:
                     self.append_newline()
                     self.append_newline(True)
 
@@ -1077,7 +1088,7 @@ class Beautifier:
                 self.append_newline()
 
         if self.last_type in ['TK_COMMA', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']:
-            if self.flags.mode != MODE.ObjectLiteral:
+            if not self.start_of_object_property():
                 self.allow_wrap_or_preserved_newline(token_text)
 
         if token_text == 'function':
@@ -1196,7 +1207,7 @@ class Beautifier:
         elif self.last_type == 'TK_WORD':
             self.output_space_before_token = True
         elif self.last_type in ['TK_COMMA', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']:
-            if self.flags.mode != MODE.ObjectLiteral:
+            if not self.start_of_object_property():
                 self.allow_wrap_or_preserved_newline(token_text)
         else:
             self.append_newline()
