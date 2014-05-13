@@ -28,6 +28,8 @@ def add_lib_path(lib_path):
 # crazyness to get jsbeautifier.unpackers to actually import
 # with sublime's weird hackery of the path and module loading
 add_lib_path(libs_path)
+add_lib_path(os.path.join(libs_path, "jsbeautifier"))
+add_lib_path(os.path.join(libs_path, "jsbeautifier", "jsbeautifier"))
 add_lib_path(src_path)
 
 import jsbeautifier, jsbeautifier.unpackers
