@@ -49,8 +49,13 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
 	def on_pre_save(self, view):
 		if(s.get("format_on_save") == True and jsf_activation.is_js_buffer(view)):
+			# only auto-format on save if there are no "lint errors"
+			# here are some named regions from sublimelint see https://github.com/lunixbochs/sublimelint/tree/st3
+			lints_regions = ['lint-keyword-underline', 'lint-keyword-outline']
+			for linter in lints_regions:
+				if len(view.get_regions(linter)):
+					return
 			view.run_command("js_format")
-
 
 class JsFormatCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
