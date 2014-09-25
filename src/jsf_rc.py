@@ -1,4 +1,4 @@
-import os, json
+import os, json, sublime
 
 def get_rc_paths(cwd):
 	result = []
