@@ -1,3 +1,0 @@
-JsFormat v1.2.0 changelog:
-
-- future maintainability release. No functionality should be impacted
