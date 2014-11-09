@@ -43,11 +43,23 @@ class TestJSBeautifier(unittest.TestCase):
         bt('var ' + six.unichr(3232) + '_' + six.unichr(3232) + ' = "hi";');
         bt('var ' + six.unichr(228) + 'x = {\n    ' + six.unichr(228) + 'rgerlich: true\n};');
 
+        self.options.end_with_newline = True;
+        test_fragment('', '\n');
+        test_fragment('   return .5','   return .5\n');
+        test_fragment('   \n\nreturn .5\n\n\n\n','   return .5\n');
+        test_fragment('\n', '\n');
+
+        self.options.end_with_newline = False;
         bt('');
+        test_fragment('\n', '');
         bt('return .5');
-        test_fragment('    return .5');
+        test_fragment('   return .5');
+        test_fragment('   return .5;\n   a();');
+        test_fragment('   < div');
         bt('a        =          1', 'a = 1');
         bt('a=1', 'a = 1');
+        bt('(3) / 2');
+        bt('["a", "b"].join("")');
         bt("a();\n\nb();", "a();\n\nb();");
         bt('var a = 1 var b = 2', "var a = 1\nvar b = 2");
         bt('var a=1, b=c[d], e=6;', 'var a = 1,\n    b = c[d],\n    e = 6;');
@@ -249,6 +261,10 @@ class TestJSBeautifier(unittest.TestCase):
         bt('{foo();++bar;}', '{\n    foo();\n    ++bar;\n}');
         bt('{--bar;}', '{\n    --bar;\n}');
         bt('{++bar;}', '{\n    ++bar;\n}');
+        bt('if(true)++a;','if (true) ++a;');
+        bt('if(true)\n++a;','if (true)\n    ++a;');
+        bt('if(true)--a;','if (true) --a;');
+        bt('if(true)\n--a;','if (true)\n    --a;');
 
         # Handling of newlines around unary ++ and -- operators
         bt('{foo\n++bar;}', '{\n    foo\n    ++bar;\n}');
@@ -264,6 +280,13 @@ class TestJSBeautifier(unittest.TestCase):
         test_fragment('a(/a[b\\[', "a(/a[b\\["); # incomplete char class
         # allow unescaped / in char classes
         bt('a(/[a/b]/);b()', "a(/[a/b]/);\nb()");
+        bt('typeof /foo\\//;');
+        bt('yield /foo\\//;');
+        bt('throw /foo\\//;');
+        bt('do /foo\\//;');
+        bt('return /foo\\//;');
+        bt('switch (a) {\n    case /foo\\//:\n        b\n}');
+        bt('if (a) /foo\\//\nelse /foo\\//;');
 
         bt('function foo() {\n    return [\n        "one",\n        "two"\n    ];\n}');
         bt('a=[[1,2],[4,5],[7,8]]', "a = [\n    [1, 2],\n    [4, 5],\n    [7, 8]\n]");
@@ -274,6 +297,8 @@ class TestJSBeautifier(unittest.TestCase):
         bt('a=[[1,2],[4,5],function(){},[7,8]]',
             "a = [\n    [1, 2],\n    [4, 5],\n    function() {},\n    [7, 8]\n]");
         bt('a=[b,c,function(){},function(){},d]',
+            "a = [b, c, function() {}, function() {}, d]");
+        bt('a=[b,c,\nfunction(){},function(){},d]',
             "a = [b, c,\n    function() {},\n    function() {},\n    d\n]");
         bt('a=[a[1],b[4],c[d[7]]]', "a = [a[1], b[4], c[d[7]]]");
         bt('[1,2,[3,4,[5,6],7],8]', "[1, 2, [3, 4, [5, 6], 7], 8]");
@@ -290,6 +315,7 @@ class TestJSBeautifier(unittest.TestCase):
         bt('return;', 'return;');
         bt('return\nfunc', 'return\nfunc');
         bt('catch(e)', 'catch (e)');
+        bt('yield [1, 2]');
 
         bt('var a=1,b={foo:2,bar:3},{baz:4,wham:5},c=4;',
             'var a = 1,\n    b = {\n        foo: 2,\n        bar: 3\n    },\n    {\n        baz: 4,\n        wham: 5\n    }, c = 4;');
@@ -302,6 +328,19 @@ class TestJSBeautifier(unittest.TestCase):
         # javadoc comment
         bt('/**\n* foo\n*/', '/**\n * foo\n */');
         bt('{\n/**\n* foo\n*/\n}', '{\n    /**\n     * foo\n     */\n}');
+
+        # starless block comment
+        bt('/**\nfoo\n*/');
+        bt('/**\nfoo\n**/');
+        bt('/**\nfoo\nbar\n**/');
+        bt('/**\nfoo\n\nbar\n**/');
+        bt('/**\nfoo\n    bar\n**/');
+        bt('{\n/**\nfoo\n*/\n}', '{\n    /**\n    foo\n    */\n}');
+        bt('{\n/**\nfoo\n**/\n}', '{\n    /**\n    foo\n    **/\n}');
+        bt('{\n/**\nfoo\nbar\n**/\n}', '{\n    /**\n    foo\n    bar\n    **/\n}');
+        bt('{\n/**\nfoo\n\nbar\n**/\n}', '{\n    /**\n    foo\n\n    bar\n    **/\n}');
+        bt('{\n/**\nfoo\n    bar\n**/\n}', '{\n    /**\n    foo\n        bar\n    **/\n}');
+        bt('{\n    /**\n    foo\nbar\n    **/\n}');
 
         bt('var a,b,c=1,d,e,f=2;', 'var a, b, c = 1,\n    d, e, f = 2;');
         bt('var a,b,c=[],d,e,f=2;', 'var a, b, c = [],\n    d, e, f = 2;');
@@ -333,6 +372,21 @@ class TestJSBeautifier(unittest.TestCase):
             'var whatever = require("whatever")\n\nfunction() {\n    a = 6\n}');
 
 
+        self.options.space_after_anon_function = True
+
+        bt('switch(x) {case 0: case 1: a(); break; default: break}',
+            "switch (x) {\n    case 0:\n    case 1:\n        a();\n        break;\n    default:\n        break\n}");
+        bt('switch(x){case -1:break;case !y:break;}',
+            'switch (x) {\n    case -1:\n        break;\n    case !y:\n        break;\n}');
+        bt('a=typeof(x)', 'a = typeof (x)');
+        bt('x();\n\nfunction(){}', 'x();\n\nfunction () {}');
+        bt('function () {\n    var a, b, c, d, e = [],\n        f;\n}');
+        test_fragment("// comment 1\n(function()", "// comment 1\n(function ()"); # typical greasemonkey start
+        bt('var o1=$.extend(a);function(){alert(x);}', 'var o1 = $.extend(a);\n\nfunction () {\n    alert(x);\n}');
+        bt('function* () {\n    yield 1;\n}');
+
+        self.options.space_after_anon_function = False
+
         self.options.jslint_happy = True
 
         bt('x();\n\nfunction(){}', 'x();\n\nfunction () {}');
@@ -344,6 +398,7 @@ class TestJSBeautifier(unittest.TestCase):
         test_fragment("// comment 1\n(function()", "// comment 1\n(function ()"); # typical greasemonkey start
         bt('var o1=$.extend(a);function(){alert(x);}', 'var o1 = $.extend(a);\n\nfunction () {\n    alert(x);\n}');
         bt('a=typeof(x)', 'a = typeof (x)');
+        bt('function* () {\n    yield 1;\n}');
 
         self.options.jslint_happy = False
 
@@ -355,8 +410,11 @@ class TestJSBeautifier(unittest.TestCase):
         bt("var a2, b2, c2, d2 = 0, c = function() {}, d = '';", "var a2, b2, c2, d2 = 0,\n    c = function() {},\n    d = '';");
         bt("var a2, b2, c2, d2 = 0, c = function() {},\nd = '';", "var a2, b2, c2, d2 = 0,\n    c = function() {},\n    d = '';");
         bt('var o2=$.extend(a);function(){alert(x);}', 'var o2 = $.extend(a);\n\nfunction() {\n    alert(x);\n}');
+        bt('function*() {\n    yield 1;\n}');
+        bt('function* x() {\n    yield 1;\n}');
 
-        bt('{"x":[{"a":1,"b":3},7,8,8,8,8,{"b":99},{"a":11}]}', '{\n    "x": [{\n            "a": 1,\n            "b": 3\n        },\n        7, 8, 8, 8, 8, {\n            "b": 99\n        }, {\n            "a": 11\n        }\n    ]\n}');
+        bt('{"x":[{"a":1,"b":3},\n7,8,8,8,8,{"b":99},{"a":11}]}', '{\n    "x": [{\n            "a": 1,\n            "b": 3\n        },\n        7, 8, 8, 8, 8, {\n            "b": 99\n        }, {\n            "a": 11\n        }\n    ]\n}');
+        bt('{"x":[{"a":1,"b":3},7,8,8,8,8,{"b":99},{"a":11}]}', '{\n    "x": [{\n        "a": 1,\n        "b": 3\n    }, 7, 8, 8, 8, 8, {\n        "b": 99\n    }, {\n        "a": 11\n    }]\n}');
 
         bt('{"1":{"1a":"1b"},"2"}', '{\n    "1": {\n        "1a": "1b"\n    },\n    "2"\n}');
         bt('{a:{a:b},c}', '{\n    a: {\n        a: b\n    },\n    c\n}');
@@ -557,7 +615,7 @@ class TestJSBeautifier(unittest.TestCase):
 
         self.options.keep_array_indentation = False;
 
-        bt('a = //comment\n/regex/;');
+        bt('a = //comment\n    /regex/;');
 
         test_fragment('/*\n * X\n */');
         test_fragment('/*\r\n * X\r\n */', '/*\n * X\n */');
@@ -599,7 +657,8 @@ class TestJSBeautifier(unittest.TestCase):
         bt('var foo = {}');
         bt('if (foo) bar();\nelse break');
         bt('function x() {\n    foo();\n}zzz', 'function x()\n{\n    foo();\n}\nzzz');
-        bt('a: do {} while (); xxx', 'a: do {} while ();\nxxx');
+        test_fragment('a: do {} while (); xxx', 'a: do {} while ();\nxxx');
+        bt('{a: do {} while (); xxx}', '{\n    a: do {} while ();xxx\n}');
         bt('var a = new function();');
         bt('var a = new function() {};');
         bt('var a = new function()\n{};', 'var a = new function() {};');
@@ -696,7 +755,8 @@ class TestJSBeautifier(unittest.TestCase):
         bt('var foo = {}');
         bt('if (foo) bar();\nelse break');
         bt('function x() {\n    foo();\n}zzz', 'function x() {\n    foo();\n}\nzzz');
-        bt('a: do {} while (); xxx', 'a: do {} while ();\nxxx');
+        test_fragment('a: do {} while (); xxx', 'a: do {} while ();\nxxx');
+        bt('{a: do {} while (); xxx}', '{\n    a: do {} while ();xxx\n}');
         bt('var a = new function();');
         bt('var a = new function() {};');
         bt('var a = new function a() {};');
@@ -789,7 +849,8 @@ class TestJSBeautifier(unittest.TestCase):
         bt('var foo = {}');
         bt('if (foo) bar();\nelse break');
         bt('function x() {\n    foo();\n}zzz', 'function x() {\n    foo();\n}\nzzz');
-        bt('a: do {} while (); xxx', 'a: do {} while ();\nxxx');
+        test_fragment('a: do {} while (); xxx', 'a: do {} while ();\nxxx');
+        bt('{a: do {} while (); xxx}', '{\n    a: do {} while ();xxx\n}');
         bt('var a = new function();');
         bt('var a = new function() {};');
         bt('var a = new function a() {};');
@@ -874,8 +935,10 @@ class TestJSBeautifier(unittest.TestCase):
         bt("{\n    var a = set\n    foo();\n}")
         bt("var x = {\n    get function()\n}")
         bt("var x = {\n    set function()\n}")
-        bt("var x = set\n\na() {}", "var x = set\n\n    a() {}");
-        bt("var x = set\n\nfunction() {}", "var x = set\n\n    function() {}")
+
+        # According to my current research get/set have no special meaning outside of an object literal
+        bt("var x = set\n\na() {}", "var x = set\n\na() {}");
+        bt("var x = set\n\nfunction() {}", "var x = set\n\nfunction() {}");
 
         bt('<!-- foo\nbar();\n-->')
         bt('<!-- dont crash')
@@ -894,6 +957,7 @@ class TestJSBeautifier(unittest.TestCase):
 
 
         bt('3.*7;', '3. * 7;')
+        bt('a = 1.e-64 * 0.5e+4 / 6e-23;');
         bt('import foo.*;', 'import foo.*;') # actionscript's import
         test_fragment('function f(a: a, b: b)') # actionscript
         bt('foo(a, function() {})');
@@ -947,6 +1011,7 @@ class TestJSBeautifier(unittest.TestCase):
                       'Test_very_long_variable_name_this_should_never_wrap\n.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_\n.okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token + 12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap + but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap + !but_this_can,\n' +
                       '    proper: "first_token_should_never_wrap" + "but_this_can"\n' +
@@ -959,6 +1024,7 @@ class TestJSBeautifier(unittest.TestCase):
                       '    Test_very_long_variable_name_this_should_never_wrap\n.but_this_can\n' +
                       '    if (wraps_can_occur && inside_an_if_block) that_is_\n.okay();\n' +
                       '    object_literal = {\n' +
+                      '        propertx: first_token + 12345678.99999E-6,\n' +
                       '        property: first_token_should_never_wrap + but_this_can,\n' +
                       '        propertz: first_token_should_never_wrap + !but_this_can,\n' +
                       '        proper: "first_token_should_never_wrap" + "but_this_can"\n' +
@@ -975,6 +1041,7 @@ class TestJSBeautifier(unittest.TestCase):
                       'Test_very_long_variable_name_this_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_.okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token + 12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap + but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap + !but_this_can,\n' +
                       '    proper: "first_token_should_never_wrap" + "but_this_can"\n' +
@@ -989,6 +1056,7 @@ class TestJSBeautifier(unittest.TestCase):
                       'Test_very_long_variable_name_this_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_.okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token + 12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap + but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap + !but_this_can,\n' +
                       '    proper: "first_token_should_never_wrap" + "but_this_can"\n' +
@@ -1006,6 +1074,8 @@ class TestJSBeautifier(unittest.TestCase):
                       'if (wraps_can_occur &&\n' +
                       '    inside_an_if_block) that_is_.okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token +\n' +
+                      '        12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap +\n' +
                       '        but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap +\n' +
@@ -1027,6 +1097,8 @@ class TestJSBeautifier(unittest.TestCase):
                       'if (wraps_can_occur &&\n' +
                       '    inside_an_if_block) that_is_.okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token +\n' +
+                      '        12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap +\n' +
                       '        but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap +\n' +
@@ -1050,6 +1122,8 @@ class TestJSBeautifier(unittest.TestCase):
                       '    if (wraps_can_occur &&\n' +
                       '        inside_an_if_block) that_is_.okay();\n' +
                       '    object_literal = {\n' +
+                      '        propertx: first_token +\n' +
+                      '            12345678.99999E-6,\n' +
                       '        property: first_token_should_never_wrap +\n' +
                       '            but_this_can,\n' +
                       '        propertz: first_token_should_never_wrap +\n' +
@@ -1071,6 +1145,7 @@ class TestJSBeautifier(unittest.TestCase):
                       'if (wraps_can_occur && inside_an_if_block) that_is_\n' +
                       '    .okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token + 12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap + but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap + !but_this_can,\n' +
                       '    proper: "first_token_should_never_wrap" + "but_this_can"\n' +
@@ -1088,6 +1163,7 @@ class TestJSBeautifier(unittest.TestCase):
                       'if (wraps_can_occur && inside_an_if_block) that_is_\n' +
                       '    .okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token + 12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap + but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap + !but_this_can,\n' +
                       '    proper: "first_token_should_never_wrap" + "but_this_can"\n' +
@@ -1107,6 +1183,8 @@ class TestJSBeautifier(unittest.TestCase):
                       '    inside_an_if_block) that_is_\n' +
                       '    .okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token +\n' +
+                      '        12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap +\n' +
                       '        but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap +\n' +
@@ -1129,6 +1207,8 @@ class TestJSBeautifier(unittest.TestCase):
                       '    inside_an_if_block) that_is_\n' +
                       '    .okay();\n' +
                       'object_literal = {\n' +
+                      '    propertx: first_token +\n' +
+                      '        12345678.99999E-6,\n' +
                       '    property: first_token_should_never_wrap +\n' +
                       '        but_this_can,\n' +
                       '    propertz: first_token_should_never_wrap +\n' +
@@ -1152,6 +1232,8 @@ class TestJSBeautifier(unittest.TestCase):
                       '        inside_an_if_block) that_is_\n' +
                       '        .okay();\n' +
                       '    object_literal = {\n' +
+                      '        propertx: first_token +\n' +
+                      '            12345678.99999E-6,\n' +
                       '        property: first_token_should_never_wrap +\n' +
                       '            but_this_can,\n' +
                       '        propertz: first_token_should_never_wrap +\n' +
@@ -1176,6 +1258,10 @@ class TestJSBeautifier(unittest.TestCase):
            'this.oa = new OAuth(_requestToken, _accessToken, consumer_key);');
         bt('foo = {\n    x: y, // #44\n    w: z // #44\n}');
         bt('switch (x) {\n    case "a":\n        // comment on newline\n        break;\n    case "b": // comment on same line\n        break;\n}');
+        bt('this.type =\n    this.options =\n    // comment\n    this.enabled null;',
+           'this.type = this.options =\n    // comment\n    this.enabled null;');
+        bt('someObj\n    .someFunc1()\n    // This comment should not break the indent\n    .someFunc2();',
+           'someObj.someFunc1()\n    // This comment should not break the indent\n    .someFunc2();');
 
         bt('if (true ||\n!true) return;', 'if (true || !true) return;');
 
@@ -1231,6 +1317,7 @@ class TestJSBeautifier(unittest.TestCase):
             'function foo() {}\n\nfunction foo() {}'
         );
 
+        bt('[\n    function() {}\n]');
 
 
         bt("if\n(a)\nb();", "if (a) b();");
@@ -1260,6 +1347,8 @@ class TestJSBeautifier(unittest.TestCase):
            ');');
         bt('foo = {\n    x: y, // #44\n    w: z // #44\n}');
         bt('switch (x) {\n    case "a":\n        // comment on newline\n        break;\n    case "b": // comment on same line\n        break;\n}');
+        bt('this.type =\n    this.options =\n    // comment\n    this.enabled null;');
+        bt('someObj\n    .someFunc1()\n    // This comment should not break the indent\n    .someFunc2();');
 
         bt('if (true ||\n!true) return;', 'if (true ||\n    !true) return;');
 
@@ -1484,6 +1573,140 @@ class TestJSBeautifier(unittest.TestCase):
            '    });');
         # END tests for issue 281
 
+        # START tests for issue 459
+        bt( '(function() {\n' +
+            '    return {\n' +
+            '        foo: function() {\n' +
+            '            return "bar";\n' +
+            '        },\n' +
+            '        bar: ["bar"]\n' +
+            '    };\n' +
+            '}());');
+        # END tests for issue 459
+
+        # START tests for issue 505
+        # strings should end at newline unless continued by backslash
+        bt( 'var name = "a;\n' +
+            'name = "b";');
+        bt( 'var name = "a; \\\n' +
+            '    name = b";');
+        # END tests for issue 505
+
+        # START tests for issue 514
+        # some operators require spaces to distinguish them
+        bt('var c = "_ACTION_TO_NATIVEAPI_" + ++g++ + +new Date;');
+        bt('var c = "_ACTION_TO_NATIVEAPI_" - --g-- - -new Date;');
+        # END tests for issue 514
+
+        # START tests for issue 440
+        # reserved words can be used as object property names
+        bt( 'a = {\n' +
+            '    function: {},\n' +
+            '    "function": {},\n' +
+            '    throw: {},\n' +
+            '    "throw": {},\n' +
+            '    var: {},\n' +
+            '    "var": {},\n' +
+            '    set: {},\n' +
+            '    "set": {},\n' +
+            '    get: {},\n' +
+            '    "get": {},\n' +
+            '    if: {},\n' +
+            '    "if": {},\n' +
+            '    then: {},\n' +
+            '    "then": {},\n' +
+            '    else: {},\n' +
+            '    "else": {},\n' +
+            '    yay: {}\n' +
+            '};');
+        # END tests for issue 440
+
+        # START tests for issue 311
+        # if-else with braces edge case
+        bt('if(x){a();}else{b();}if(y){c();}',
+            'if (x) {\n' +
+            '    a();\n' +
+            '} else {\n' +
+            '    b();\n' +
+            '}\n' +
+            'if (y) {\n' +
+            '    c();\n' +
+            '}');
+        # END tests for issue 311
+
+        # START tests for issue 485
+        # ensure function declarations behave the same in arrays as elsewhere
+        bt( 'var v = ["a",\n' +
+            '    function() {\n' +
+            '        return;\n' +
+            '    }, {\n' +
+            '        id: 1\n' +
+            '    }\n' +
+            '];');
+        bt( 'var v = ["a", function() {\n' +
+            '    return;\n' +
+            '}, {\n' +
+            '    id: 1\n' +
+            '}];');
+        # END tests for issue 485
+
+        # START tests for issue 382
+        # initial totally cursor support for es6 module export
+        bt( 'module "Even" {\n' +
+            '    import odd from "Odd";\n' +
+            '    export function sum(x, y) {\n' +
+            '        return x + y;\n' +
+            '    }\n' +
+            '    export var pi = 3.141593;\n' +
+            '    export default moduleName;\n' +
+            '}');
+        bt( 'module "Even" {\n' +
+            '    export default function div(x, y) {}\n' +
+            '}');
+        # END tests for issue 382
+
+        # START tests for issue 508
+        bt('set["name"]');
+        bt('get["name"]');
+        test_fragment(
+            'a = {\n' +
+            '    set b(x) {},\n' +
+            '    c: 1,\n' +
+            '    d: function() {}\n' +
+            '};');
+        test_fragment(
+            'a = {\n' +
+            '    get b() {\n' +
+            '        retun 0;\n' +
+            '    },\n' +
+            '    c: 1,\n' +
+            '    d: function() {}\n' +
+            '};');
+        # END tests for issue 508
+
+        # START tests for issue 298
+        # do not under indent if/while/for condtionals experesions
+        bt("'use strict';\n" +
+            "if ([].some(function() {\n" +
+            "        return false;\n" +
+            "    })) {\n" +
+            "    console.log('hello');\n" +
+            "}");
+        # END tests for issue 298
+
+        # START tests for issue 552
+        # Typescript?  Okay... we didn't break it before try not to now.
+        bt( "class Test {\n" +
+            "    blah: string[];\n" +
+            "    foo(): number {\n" +
+            "        return 0;\n" +
+            "    }\n" +
+            "    bar(): number {\n" +
+            "        return 0;\n" +
+            "    }\n" +
+            "}");
+        # END tests for issue 552
+
         bt('var a=1,b={bang:2},c=3;',
             'var a = 1,\n    b = {\n        bang: 2\n    },\n    c = 3;');
         bt('var a={bing:1},b=2,c=3;',
@@ -1492,20 +1715,25 @@ class TestJSBeautifier(unittest.TestCase):
 
 
     def decodesto(self, input, expectation=None):
-        self.assertEqual(
-            jsbeautifier.beautify(input, self.options), expectation or input)
+        if expectation == None:
+            expectation = input
+
+        self.assertMultiLineEqual(
+            jsbeautifier.beautify(input, self.options), expectation)
 
         # if the expected is different from input, run it again
         # expected output should be unchanged when run twice.
         if not expectation == None:
-            self.assertEqual(
+            self.assertMultiLineEqual(
                 jsbeautifier.beautify(expectation, self.options), expectation)
 
     def wrap(self, text):
         return self.wrapregex.sub('    \\1', text)
 
     def bt(self, input, expectation=None):
-        expectation = expectation or input
+        if expectation == None:
+            expectation = input
+
         self.decodesto(input, expectation)
         if self.options.indent_size == 4 and input:
             wrapped_input = '{\n%s\nfoo=bar;}' % self.wrap(input)
