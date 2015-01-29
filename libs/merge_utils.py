@@ -65,10 +65,10 @@ def _merge_code(view, edit, code, formatted):
 def merge_code(view, edit, code, formatted_code):
     vs = view.settings()
     ttts = vs.get("translate_tabs_to_spaces")
-    vs.set("translate_tabs_to_spaces", False)
     if not code.strip():
         return (False, '')
 
+    vs.set("translate_tabs_to_spaces", False)
     dirty = False
     err = ''
     try:
