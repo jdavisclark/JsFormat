@@ -48,7 +48,7 @@ if is_py2k:
 
 class PreSaveFormatListner(sublime_plugin.EventListener):
 	"""Event listener to run JsFormat during the presave event"""
-	def on_pre_save(self, view):
+	def on_pre_save_async(self, view):
 		if(s.get("format_on_save") == True and jsf_activation.is_js_buffer(view)):
 			# only auto-format on save if there are no "lint errors"
 			# here are some named regions from sublimelint see https://github.com/lunixbochs/sublimelint/tree/st3
