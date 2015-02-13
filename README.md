@@ -1,6 +1,6 @@
-## Summary
-
 [![Join the chat at https://gitter.im/jdc0589/JsFormat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jdc0589/JsFormat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+## About
 JsFormat is a javascript formatting plugin for Sublime Text 2.
 It uses the command-line/python-module javascript formatter from http://jsbeautifier.org/ to format whole js or json files, or the selected portion(s).
 
