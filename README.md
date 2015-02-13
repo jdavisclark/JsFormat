@@ -1,4 +1,6 @@
 ## Summary
+
+[![Join the chat at https://gitter.im/jdc0589/JsFormat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jdc0589/JsFormat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 JsFormat is a javascript formatting plugin for Sublime Text 2.
 It uses the command-line/python-module javascript formatter from http://jsbeautifier.org/ to format whole js or json files, or the selected portion(s).
 
@@ -77,7 +79,7 @@ The default key binding is "ctrl+alt+f"
 Unfortunately there are other plugins that use "ctrl + alt + f", this is a hard problem to solve. If JsFormat works
 OK via the command palette but does nothing when you use the "ctrl + alt + f" shortcut, you have two options:
 
-1. Add ```{ "keys": ["ctrl+alt+f"], "command": "js_format"}``` to your user keybindings file. This will override anything specified by a plugin.
+1. Add ```{ "keys": ["ctrl+alt+f"], "command": "js_format", "context": [{"key": "selector", "operator": "equal", "operand": "source.javascript"}] }``` to your user keybindings file. This will override anything specified by a plugin.
 2. Find the offending plugin, and change the shortcut in its sublime-keymap file (will revert on updates)
 
 
