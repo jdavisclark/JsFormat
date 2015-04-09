@@ -31,6 +31,7 @@ The following **JsBeautifier** settings are available in JsFormat/JsFormat.subli
 * `break_chained_methods`: false*
 * `e4x`: false
 * `wrap_line_length`: 0
+* `space_after_anon_function`: false
 
 The following **JsFormat** specific settings are also exposed:
 
