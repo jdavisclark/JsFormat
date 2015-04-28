@@ -75,11 +75,10 @@ class JsFormatCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         settings = self.view.settings()
 
-        print('s.get("ignore_sublime_settings")', s.get("ignore_sublime_settings"))
-
         if s.get("ignore_sublime_settings"):
             _, ext = os.path.splitext(self.view.file_name())
-            if ext in {".sublime-settings"}:
+            if ext in {".sublime-settings",
+                       ".sublime-project"}:
                 return
 
         # settings
