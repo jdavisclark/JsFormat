@@ -77,6 +77,13 @@ class JsFormatCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         settings = self.view.settings()
 
+        print('s.get("ignore_sublime_settings")', s.get("ignore_sublime_settings"))
+
+        if s.get("ignore_sublime_settings"):
+            _, ext = os.path.splitext(self.view.file_name())
+            if ext in {".sublime-settings"}:
+                return
+
         # settings
         opts = jsbeautifier.default_options()
         opts.indent_char = " " if settings.get("translate_tabs_to_spaces") else "\t"
