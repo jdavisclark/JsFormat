@@ -62,7 +62,7 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
     """Event listener to run JsFormat during the presave event"""
 
     def on_pre_save(self, view):
-        if(s.get("format_on_save") == True and jsf_activation.is_js_buffer(view)):
+        if(s.get("format_on_save") and jsf_activation.is_js_buffer(view)):
             # only auto-format on save if there are no "lint errors"
             # here are some named regions from sublimelint see https://github.com/lunixbochs/sublimelint/tree/st3
             lints_regions = ['lint-keyword-underline', 'lint-keyword-outline']
@@ -83,7 +83,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
         opts.indent_size = int(settings.get("tab_size")) if opts.indent_char == " " else 1
         opts = jsf_rc.augment_options(opts, s)
 
-        if(s.get("jsbeautifyrc_files") == True):
+        if s.get("jsbeautifyrc_files"):
             opts = jsf_rc.augment_options_by_rc_files(opts, self.view)
 
         selection = self.view.sel()[0]
