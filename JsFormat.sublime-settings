@@ -17,5 +17,5 @@
 	// jsformat options
 	"format_on_save": false,
 	"jsbeautifyrc_files": false,
-	"ignore_sublime_settings": true,
+	"ignore_sublime_settings": true
 }
