@@ -78,7 +78,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
 
         if file_name is not None and s.get("ignore_sublime_settings"):
             _, ext = os.path.splitext(file_name)
-            if ext in {".sublime-settings", ".sublime-project"}:
+            if ext in [".sublime-settings", ".sublime-project"]:
                 return
 
         # settings
