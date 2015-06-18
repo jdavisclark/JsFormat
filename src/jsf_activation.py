@@ -12,4 +12,4 @@ def is_js_buffer(view):
 	if(syntaxPath != None):
 		syntax = os.path.splitext(syntaxPath)[0].split('/')[-1].lower()
 
-	return ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax
+	return (ext in ['js', 'json'] or "javascript" in syntax or "json" in syntax) and "jsx" not in ext
