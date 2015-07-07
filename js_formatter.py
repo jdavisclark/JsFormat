@@ -93,7 +93,7 @@ class JsFormatCommand(sublime_plugin.TextCommand):
         selection = self.view.sel()[0]
 
         # formatting a selection/highlighted area
-        if(len(selection) > 0):
+        if(len(selection) > 0 and s.get("format_selection")):
             jsf.format_selection(self.view, edit, opts)
         else:
             jsf.format_whole_file(self.view, edit, opts)
