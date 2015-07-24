@@ -18,5 +18,9 @@
 	"format_on_save": false,
 	"format_selection": true,
 	"jsbeautifyrc_files": false,
-	"ignore_sublime_settings": true
+	"ignore_sublime_settings": true,
+
+    // On Save File Filter
+	//   Please use regular expression
+	"format_on_save_filter": "\\.(js|jason)$"
 }

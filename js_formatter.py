@@ -2,6 +2,7 @@ import sublime
 import sublime_plugin
 import sys
 import os
+import re
 
 directory = os.path.dirname(os.path.realpath(__file__))
 libs_path = os.path.join(directory, "libs")
@@ -60,7 +61,7 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
     """Event listener to run JsFormat during the presave event"""
 
     def on_pre_save(self, view):
-        if(s.get("format_on_save") and jsf_activation.is_js_buffer(view)):
+        if(s.get("format_on_save") and re.search(s.get("format_on_save_filter"), view.file_name())):
             # only auto-format on save if there are no "lint errors"
             # here are some named regions from sublimelint see https://github.com/lunixbochs/sublimelint/tree/st3
             lints_regions = ['lint-keyword-underline', 'lint-keyword-outline']
