@@ -36,7 +36,7 @@ The following **JsBeautifier** settings are available in JsFormat/JsFormat.subli
 The following **JsFormat** specific settings are also exposed:
 
 - `format_on_save`: false  (format files on buffer save)
-- `format_on_save_extensions`: ["js", "json"]  (extensions of files that will be formatted on save)
+- `format_on_save_extensions`: [["js", "json"]]  (extensions of files that will be formatted on save)
 - `jsbeautifyrc_files`: false (see the [.jsbeautifyrc files](#jsbeautifyrc-files) section)
 
 I had temporary lapse of judgment a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
