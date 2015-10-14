@@ -36,6 +36,7 @@ The following **JsBeautifier** settings are available in JsFormat/JsFormat.subli
 The following **JsFormat** specific settings are also exposed:
 
 - `format_on_save`: false  (format files on buffer save)
+- `format_on_save_extensions`: ["js", "json"]  (extensions of files that will be formatted on save)
 - `jsbeautifyrc_files`: false (see the [.jsbeautifyrc files](#jsbeautifyrc-files) section)
 
 I had temporary lapse of judgment a while back and merged a pull request that modified jsbeautifier. As a result, the functionality that
@@ -44,14 +45,14 @@ was added from that pull request has been lost; ```"ensure_space_before_linestar
 The JsFormat specific ```ensure_newline_at_eof_on_save``` setting has also been removed. This functionality exists in sublime core.
 
 #### jsbeautifyrc files ####
-JsFormat now supports `.jsbeautifyrc` JSON files (disabled by default), which themselves support any of the exposed JsBeautifier options. The option augmentation order is: default options -> user settings -> `.jsbeautifyrc` option files. 
+JsFormat now supports `.jsbeautifyrc` JSON files (disabled by default), which themselves support any of the exposed JsBeautifier options. The option augmentation order is: default options -> user settings -> `.jsbeautifyrc` option files.
 
-A hierarchy of `.jsbeautifyrc` files is supported, where rc files at the deeper levels override the settings from rc files at higher levels. For example, given the file structure listed below, formatting `/home/you/myProject/app.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc`, while formatting `/home/you/myProject/tests/test.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc` -> `/home/you/myProject/tests/.jsbeautifyrc` 
+A hierarchy of `.jsbeautifyrc` files is supported, where rc files at the deeper levels override the settings from rc files at higher levels. For example, given the file structure listed below, formatting `/home/you/myProject/app.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc`, while formatting `/home/you/myProject/tests/test.js` would inherit settings from: default -> user settings -> `/home/you/myProject/.jsbeautifyrc` -> `/home/you/myProject/tests/.jsbeautifyrc`
 
 - /home/you/myProject/.jsbeautifyrc
 - /home/you/myProject/app.js
 - /home/you/myProject/tests/.jsbeautifyrc
-- /home/you/myProject/tests/test.js  
+- /home/you/myProject/tests/test.js
 
 
 
