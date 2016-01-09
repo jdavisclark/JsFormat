@@ -46,7 +46,7 @@ import jsf_activation
 import jsf_rc
 
 s = None
-
+ignore_next_format_on_save = False
 
 def plugin_loaded():
     global s
@@ -61,17 +61,29 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
     """Event listener to run JsFormat during the presave event"""
 
     def on_pre_save(self, view):
-        extOrClause = "|".join(s.get("format_on_save_extensions"))
-        extRegex = "\\.(" + extOrClause + ")$"
-        if(s.get("format_on_save") and re.search(extRegex, view.file_name())):
-            # only auto-format on save if there are no "lint errors"
-            # here are some named regions from sublimelint see https://github.com/lunixbochs/sublimelint/tree/st3
-            lints_regions = ['lint-keyword-underline', 'lint-keyword-outline']
-            for linter in lints_regions:
-                if len(view.get_regions(linter)):
-                    return
-            view.run_command("js_format")
+        global ignore_next_format_on_save
+        if ignore_next_format_on_save:
+            ignore_next_format_on_save = False
+        else:
+            extOrClause = "|".join(s.get("format_on_save_extensions"))
+            extRegex = "\\.(" + extOrClause + ")$"
+            if(s.get("format_on_save") and re.search(extRegex, view.file_name())):
+                # only auto-format on save if there are no "lint errors"
+                # here are some named regions from sublimelint see https://github.com/lunixbochs/sublimelint/tree/st3
+                lints_regions = ['lint-keyword-underline', 'lint-keyword-outline']
+                for linter in lints_regions:
+                    if len(view.get_regions(linter)):
+                        return
+                view.run_command("js_format")
 
+class JsFormatPreSaveNoFormatCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        global ignore_next_format_on_save
+        ignore_next_format_on_save = True
+        sublime.active_window().active_view().run_command("save")
+
+    def is_visible(self):
+        return s.get("format_on_save") and jsf_activation.is_js_buffer(self.view)
 
 class JsFormatCommand(sublime_plugin.TextCommand):
 
