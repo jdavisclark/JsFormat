@@ -36,7 +36,7 @@ def read_json(path):
 def augment_options(options, subset):
     """ augment @options with defined values in @subset
 
-        options -- a regular old class with public attributes
+        options -- a class with public attributes. jsbeautifier options: https://git.io/vVyYB
         subset -- anything with a 'get' callable (json style)
     """
     fields = [attr for attr in dir(options) if not callable(getattr(options, attr)) and not attr.startswith("__")]
