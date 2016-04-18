@@ -12,8 +12,6 @@ is_py2k = sys.version_info < (3, 0)
 # Python 2.x on Windows can't properly import from non-ASCII paths, so
 # this code added the DOC 8.3 version of the lib folder to the path in
 # case the user's username includes non-ASCII characters
-
-
 def add_lib_path(lib_path):
     def _try_get_short_path(path):
         path = os.path.normpath(path)
@@ -34,19 +32,12 @@ def add_lib_path(lib_path):
 # crazyness to get jsbeautifier.unpackers to actually import
 # with sublime's weird hackery of the path and module loading
 add_lib_path(libs_path)
-add_lib_path(os.path.join(libs_path, "six-1.8.0"))
-add_lib_path(os.path.join(libs_path, "jsbeautifier"))
-add_lib_path(os.path.join(libs_path, "jsbeautifier", "jsbeautifier"))
 add_lib_path(src_path)
 
-import jsbeautifier
-import jsbeautifier.unpackers
-import jsf
-import jsf_activation
-import jsf_rc
+import jsbeautifier, jsbeautifier.unpackers
+import jsf, jsf_activation, jsf_rc
 
 s = None
-
 
 def plugin_loaded():
     global s
@@ -55,11 +46,8 @@ def plugin_loaded():
 if is_py2k:
     plugin_loaded()
 
-
 class PreSaveFormatListner(sublime_plugin.EventListener):
-
     """Event listener to run JsFormat during the presave event"""
-
     def on_pre_save(self, view):
         extOrClause = "|".join(s.get("format_on_save_extensions"))
         extRegex = "\\.(" + extOrClause + ")$"
@@ -72,9 +60,7 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
                     return
             view.run_command("js_format")
 
-
 class JsFormatCommand(sublime_plugin.TextCommand):
-
     def run(self, edit):
         settings = self.view.settings()
         file_name = self.view.file_name()

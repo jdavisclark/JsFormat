@@ -1,15 +1,55 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+    AUTO-GENERATED. DO NOT MODIFY.
+    Script: test/generate-tests.js
+    Template: test/data/javascript/python.mustache
+    Data: test/data/javascript/tests.js
+'''
+
 import re
 import unittest
 import jsbeautifier
 import six
+import copy
 
 class TestJSBeautifier(unittest.TestCase):
+    options = None
+
+    @classmethod
+    def setUpClass(cls):
+        true = True
+        false = False
+
+        default_options = jsbeautifier.default_options()
+        default_options.indent_size = 4
+        default_options.indent_char = ' '
+        default_options.preserve_newlines = True
+        default_options.jslint_happy = False
+        default_options.keep_array_indentation = False
+        default_options.brace_style = 'collapse'
+        default_options.indent_level = 0
+        default_options.break_chained_methods = False
+        default_options.eol = '\n'
+
+        default_options.indent_size = 4
+        default_options.indent_char = ' '
+        default_options.preserve_newlines = true
+        default_options.jslint_happy = false
+        default_options.keep_array_indentation = false
+        default_options.brace_style = 'collapse'
+
+        cls.default_options = default_options
+        cls.wrapregex = re.compile('^(.+)$', re.MULTILINE)
+
+    def reset_options(self):
+        self.options = copy.copy(self.default_options)
+
     def test_unescape(self):
         # Test cases contributed by <chrisjshull on GitHub.com>
         test_fragment = self.decodesto
+        self.reset_options()
         bt = self.bt
 
         bt('"\\\\s"') # == "\\s" in the js source
@@ -23,7 +63,7 @@ class TestJSBeautifier(unittest.TestCase):
         bt('a = /\s+/')
         #bt('a = /\\x41/','a = /A/')
         bt('"\\u2022";a = /\s+/;"\\x41\\x42\\x43\\x01".match(/\\x41/);','"\\u2022";\na = /\s+/;\n"\\x41\\x42\\x43\\x01".match(/\\x41/);')
-        bt('"\\x22\\x27",\'\\x22\\x27\',"\\x5c",\'\\x5c\',"\\xff and \\xzz","unicode \\u0000 \\u0022 \\u0027 \\u005c \\uffff \\uzzzz"', '"\\x22\\x27", \'\\x22\\x27\', "\\x5c", \'\\x5c\', "\\xff and \\xzz", "unicode \\u0000 \\u0022 \\u0027 \\u005c \\uffff \\uzzzz"')
+        test_fragment('"\\x22\\x27",\'\\x22\\x27\',"\\x5c",\'\\x5c\',"\\xff and \\xzz","unicode \\u0000 \\u0022 \\u0027 \\u005c \\uffff \\uzzzz"', '"\\x22\\x27", \'\\x22\\x27\', "\\x5c", \'\\x5c\', "\\xff and \\xzz", "unicode \\u0000 \\u0022 \\u0027 \\u005c \\uffff \\uzzzz"')
 
         self.options.unescape_strings = True
 
@@ -31,10 +71,9 @@ class TestJSBeautifier(unittest.TestCase):
         bt('"\\u2022"', '"\\u2022"')
         bt('a = /\s+/')
         bt('"\\u2022";a = /\s+/;"\\x41\\x42\\x43\\x01".match(/\\x41/);','"\\u2022";\na = /\s+/;\n"ABC\\x01".match(/\\x41/);')
-        bt('"\\x22\\x27",\'\\x22\\x27\',"\\x5c",\'\\x5c\',"\\xff and \\xzz","unicode \\u0000 \\u0022 \\u0027 \\u005c \\uffff \\uzzzz"', '"\\"\'", \'"\\\'\', "\\\\", \'\\\\\', "\\xff and \\xzz", "unicode \\u0000 \\" \' \\\\ \\uffff \\uzzzz"')
+        test_fragment('"\\x22\\x27",\'\\x22\\x27\',"\\x5c",\'\\x5c\',"\\xff and \\xzz","unicode \\u0000 \\u0022 \\u0027 \\u005c \\uffff \\uzzzz"', '"\\"\'", \'"\\\'\', "\\\\", \'\\\\\', "\\xff and \\xzz", "unicode \\u0000 \\" \' \\\\ \\uffff \\uzzzz"')
 
         self.options.unescape_strings = False
-
 
     def test_beautifier(self):
         test_fragment = self.decodesto
@@ -46,13 +85,9 @@ class TestJSBeautifier(unittest.TestCase):
         def unicode_char(value):
             return six.unichr(value)
 
-        self.options.indent_size = 4
-        self.options.indent_char = ' '
-        self.options.preserve_newlines = true
-        self.options.jslint_happy = false
-        self.options.keep_array_indentation = false
-        self.options.brace_style = 'collapse'
 
+        self.reset_options();
+        #============================================================
         # Unicode Support
         bt('var ' + unicode_char(3232) + '_' + unicode_char(3232) + ' = "hi";')
         bt(
@@ -60,6 +95,37 @@ class TestJSBeautifier(unittest.TestCase):
             '    ' + unicode_char(228) + 'rgerlich: true\n' +
             '};')
 
+
+        self.reset_options();
+        #============================================================
+        # Test template and continuation strings
+        bt('`This is a ${template} string.`')
+        bt('`This\n  is\n  a\n  ${template}\n  string.`')
+        bt('a = `This is a continuation\\nstring.`')
+        bt('a = "This is a continuation\\nstring."')
+        bt('`SELECT\n  nextval(\'${this.options.schema ? `${this.options.schema}.` : \'\'}"${this.tableName}_${this.autoIncrementField}_seq"\'::regclass\n  ) nextval;`')
+
+
+        self.reset_options();
+        #============================================================
+        # ES7 Decorators
+        bt('@foo')
+        bt('@foo(bar)')
+        bt(
+            '@foo(function(k, v) {\n' +
+            '    implementation();\n' +
+            '})')
+
+
+        self.reset_options();
+        #============================================================
+        # ES7 exponential
+        bt('x ** 2')
+        bt('x ** -2')
+
+
+        self.reset_options();
+        #============================================================
         # End With Newline - (eof = "\n")
         self.options.end_with_newline = true
         test_fragment('', '\n')
@@ -74,25 +140,41 @@ class TestJSBeautifier(unittest.TestCase):
         test_fragment('   \n\nreturn .5\n\n\n\n', '   return .5')
         test_fragment('\n', '')
 
-        # Comma-first option - (c0 = "\n, ", c1 = "\n    , ", c2 = "\n        , ", c3 = "\n            , ")
-        self.options.comma_first = true
-        bt('{a:1, b:2}', '{\n    a: 1\n    , b: 2\n}')
-        bt('var a=1, b=c[d], e=6;', 'var a = 1\n    , b = c[d]\n    , e = 6;')
-        bt('for(var a=1,b=2,c=3;d<3;d++)\ne', 'for (var a = 1, b = 2, c = 3; d < 3; d++)\n    e')
-        bt('for(var a=1,b=2,\nc=3;d<3;d++)\ne', 'for (var a = 1, b = 2\n        , c = 3; d < 3; d++)\n    e')
-        bt('function foo() {\n    return [\n        "one"\n        , "two"\n    ];\n}')
-        bt('a=[[1,2],[4,5],[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , [7, 8]\n]')
-        bt('a=[[1,2],[4,5],[7,8],]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , [7, 8]\n, ]')
-        bt('a=[[1,2],[4,5],function(){},[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , function() {}\n    , [7, 8]\n]')
-        bt('a=[[1,2],[4,5],function(){},function(){},[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , function() {}\n    , function() {}\n    , [7, 8]\n]')
-        bt('a=[[1,2],[4,5],function(){},[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , function() {}\n    , [7, 8]\n]')
-        bt('a=[b,c,function(){},function(){},d]', 'a = [b, c, function() {}, function() {}, d]')
-        bt('a=[b,c,\nfunction(){},function(){},d]', 'a = [b, c\n    , function() {}\n    , function() {}\n    , d\n]')
-        bt('a=[a[1],b[4],c[d[7]]]', 'a = [a[1], b[4], c[d[7]]]')
-        bt('[1,2,[3,4,[5,6],7],8]', '[1, 2, [3, 4, [5, 6], 7], 8]')
-        bt('[[["1","2"],["3","4"]],[["5","6","7"],["8","9","0"]],[["1","2","3"],["4","5","6","7"],["8","9","0"]]]', '[\n    [\n        ["1", "2"]\n        , ["3", "4"]\n    ]\n    , [\n        ["5", "6", "7"]\n        , ["8", "9", "0"]\n    ]\n    , [\n        ["1", "2", "3"]\n        , ["4", "5", "6", "7"]\n        , ["8", "9", "0"]\n    ]\n]')
 
-        # Comma-first option - (c0 = ",\n", c1 = ",\n    ", c2 = ",\n        ", c3 = ",\n            ")
+        self.reset_options();
+        #============================================================
+        # Brace style permutations - (ibo = "", iao = "", ibc = "", iac = "", obo = " ", oao = " ", obc = " ", oac = " ")
+        self.options.brace_style = 'collapse-preserve-inline'
+        bt('var a ={a: 2};\nvar a ={a: 2};', 'var a = { a: 2 };\nvar a = { a: 2 };')
+        bt('//case 1\nif (a == 1){}\n//case 2\nelse if (a == 2){}', '//case 1\nif (a == 1) {}\n//case 2\nelse if (a == 2) {}')
+        bt('if(1){2}else{3}', 'if (1) { 2 } else { 3 }')
+        bt('try{a();}catch(b){c();}catch(d){}finally{e();}', 'try { a(); } catch (b) { c(); } catch (d) {} finally { e(); }')
+
+        # Brace style permutations - (ibo = "\n", iao = "\n", ibc = "\n", iac = "\n", obo = " ", oao = "\n    ", obc = "\n", oac = " ")
+        self.options.brace_style = 'collapse-preserve-inline'
+        bt('var a =\n{\na: 2\n}\n;\nvar a =\n{\na: 2\n}\n;', 'var a = {\n    a: 2\n};\nvar a = {\n    a: 2\n};')
+        bt('//case 1\nif (a == 1)\n{}\n//case 2\nelse if (a == 2)\n{}', '//case 1\nif (a == 1) {}\n//case 2\nelse if (a == 2) {}')
+        bt('if(1)\n{\n2\n}\nelse\n{\n3\n}', 'if (1) {\n    2\n} else {\n    3\n}')
+        bt('try\n{\na();\n}\ncatch(b)\n{\nc();\n}\ncatch(d)\n{}\nfinally\n{\ne();\n}', 'try {\n    a();\n} catch (b) {\n    c();\n} catch (d) {} finally {\n    e();\n}')
+
+        # Brace style permutations - (ibo = "", iao = "", ibc = "", iac = "", obo = " ", oao = "\n    ", obc = "\n", oac = " ")
+        self.options.brace_style = 'collapse'
+        bt('var a ={a: 2};\nvar a ={a: 2};', 'var a = {\n    a: 2\n};\nvar a = {\n    a: 2\n};')
+        bt('//case 1\nif (a == 1){}\n//case 2\nelse if (a == 2){}', '//case 1\nif (a == 1) {}\n//case 2\nelse if (a == 2) {}')
+        bt('if(1){2}else{3}', 'if (1) {\n    2\n} else {\n    3\n}')
+        bt('try{a();}catch(b){c();}catch(d){}finally{e();}', 'try {\n    a();\n} catch (b) {\n    c();\n} catch (d) {} finally {\n    e();\n}')
+
+        # Brace style permutations - (ibo = "\n", iao = "\n", ibc = "\n", iac = "\n", obo = " ", oao = "\n    ", obc = "\n", oac = " ")
+        self.options.brace_style = 'collapse'
+        bt('var a =\n{\na: 2\n}\n;\nvar a =\n{\na: 2\n}\n;', 'var a = {\n    a: 2\n};\nvar a = {\n    a: 2\n};')
+        bt('//case 1\nif (a == 1)\n{}\n//case 2\nelse if (a == 2)\n{}', '//case 1\nif (a == 1) {}\n//case 2\nelse if (a == 2) {}')
+        bt('if(1)\n{\n2\n}\nelse\n{\n3\n}', 'if (1) {\n    2\n} else {\n    3\n}')
+        bt('try\n{\na();\n}\ncatch(b)\n{\nc();\n}\ncatch(d)\n{}\nfinally\n{\ne();\n}', 'try {\n    a();\n} catch (b) {\n    c();\n} catch (d) {} finally {\n    e();\n}')
+
+
+        self.reset_options();
+        #============================================================
+        # Comma-first option - (c0 = ",\n", c1 = ",\n    ", c2 = ",\n        ", c3 = ",\n            ", f1 = "    ,\n    ")
         self.options.comma_first = false
         bt('{a:1, b:2}', '{\n    a: 1,\n    b: 2\n}')
         bt('var a=1, b=c[d], e=6;', 'var a = 1,\n    b = c[d],\n    e = 6;')
@@ -109,9 +191,146 @@ class TestJSBeautifier(unittest.TestCase):
         bt('a=[a[1],b[4],c[d[7]]]', 'a = [a[1], b[4], c[d[7]]]')
         bt('[1,2,[3,4,[5,6],7],8]', '[1, 2, [3, 4, [5, 6], 7], 8]')
         bt('[[["1","2"],["3","4"]],[["5","6","7"],["8","9","0"]],[["1","2","3"],["4","5","6","7"],["8","9","0"]]]', '[\n    [\n        ["1", "2"],\n        ["3", "4"]\n    ],\n    [\n        ["5", "6", "7"],\n        ["8", "9", "0"]\n    ],\n    [\n        ["1", "2", "3"],\n        ["4", "5", "6", "7"],\n        ["8", "9", "0"]\n    ]\n]')
+        bt(
+            'changeCollection.add({\n' +
+            '    name: "Jonathan" // New line inserted after this line on every save\n' +
+            '    , age: 25\n' +
+            '});',
+            'changeCollection.add({\n' +
+            '    name: "Jonathan" // New line inserted after this line on every save\n' +
+            '        ,\n    age: 25\n' +
+            '});')
 
+        # Comma-first option - (c0 = "\n, ", c1 = "\n    , ", c2 = "\n        , ", c3 = "\n            , ", f1 = ", ")
+        self.options.comma_first = true
+        bt('{a:1, b:2}', '{\n    a: 1\n    , b: 2\n}')
+        bt('var a=1, b=c[d], e=6;', 'var a = 1\n    , b = c[d]\n    , e = 6;')
+        bt('for(var a=1,b=2,c=3;d<3;d++)\ne', 'for (var a = 1, b = 2, c = 3; d < 3; d++)\n    e')
+        bt('for(var a=1,b=2,\nc=3;d<3;d++)\ne', 'for (var a = 1, b = 2\n        , c = 3; d < 3; d++)\n    e')
+        bt('function foo() {\n    return [\n        "one"\n        , "two"\n    ];\n}')
+        bt('a=[[1,2],[4,5],[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , [7, 8]\n]')
+        bt('a=[[1,2],[4,5],[7,8],]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , [7, 8]\n, ]')
+        bt('a=[[1,2],[4,5],function(){},[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , function() {}\n    , [7, 8]\n]')
+        bt('a=[[1,2],[4,5],function(){},function(){},[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , function() {}\n    , function() {}\n    , [7, 8]\n]')
+        bt('a=[[1,2],[4,5],function(){},[7,8]]', 'a = [\n    [1, 2]\n    , [4, 5]\n    , function() {}\n    , [7, 8]\n]')
+        bt('a=[b,c,function(){},function(){},d]', 'a = [b, c, function() {}, function() {}, d]')
+        bt('a=[b,c,\nfunction(){},function(){},d]', 'a = [b, c\n    , function() {}\n    , function() {}\n    , d\n]')
+        bt('a=[a[1],b[4],c[d[7]]]', 'a = [a[1], b[4], c[d[7]]]')
+        bt('[1,2,[3,4,[5,6],7],8]', '[1, 2, [3, 4, [5, 6], 7], 8]')
+        bt('[[["1","2"],["3","4"]],[["5","6","7"],["8","9","0"]],[["1","2","3"],["4","5","6","7"],["8","9","0"]]]', '[\n    [\n        ["1", "2"]\n        , ["3", "4"]\n    ]\n    , [\n        ["5", "6", "7"]\n        , ["8", "9", "0"]\n    ]\n    , [\n        ["1", "2", "3"]\n        , ["4", "5", "6", "7"]\n        , ["8", "9", "0"]\n    ]\n]')
+        bt(
+            'changeCollection.add({\n' +
+            '    name: "Jonathan" // New line inserted after this line on every save\n' +
+            '    , age: 25\n' +
+            '});')
+
+
+        self.reset_options();
+        #============================================================
+        # Space in parens tests - (s = "", e = "")
+        self.options.space_in_paren = false
+        self.options.space_in_empty_paren = false
+        bt('if(p) foo(a,b);', 'if (p) foo(a, b);')
+        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }', 'try {\n    while (true) {\n        willThrow()\n    }\n} catch (result) switch (result) {\n    case 1:\n        ++result\n}')
+        bt('((e/((a+(b)*c)-d))^2)*5;', '((e / ((a + (b) * c) - d)) ^ 2) * 5;')
+        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}', 'function f(a, b) {\n    if (a) b()\n}\n\nfunction g(a, b) {\n    if (!a) b()\n}')
+        bt('a=[];', 'a = [];')
+        bt('a=[b,c,d];', 'a = [b, c, d];')
+        bt('a= f[b];', 'a = f[b];')
+        bt(
+            '{\n' +
+            '    files: [ {\n' +
+            '        expand: true,\n' +
+            '        cwd: "www/gui/",\n' +
+            '        src: [ "im/design_standards/*.*" ],\n' +
+            '        dest: "www/gui/build"\n' +
+            '    } ]\n' +
+            '}',
+            '{\n' +
+            '    files: [{\n' +
+            '        expand: true,\n' +
+            '        cwd: "www/gui/",\n' +
+            '        src: ["im/design_standards/*.*"],\n' +
+            '        dest: "www/gui/build"\n' +
+            '    }]\n' +
+            '}')
+
+        # Space in parens tests - (s = "", e = "")
+        self.options.space_in_paren = false
+        self.options.space_in_empty_paren = true
+        bt('if(p) foo(a,b);', 'if (p) foo(a, b);')
+        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }', 'try {\n    while (true) {\n        willThrow()\n    }\n} catch (result) switch (result) {\n    case 1:\n        ++result\n}')
+        bt('((e/((a+(b)*c)-d))^2)*5;', '((e / ((a + (b) * c) - d)) ^ 2) * 5;')
+        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}', 'function f(a, b) {\n    if (a) b()\n}\n\nfunction g(a, b) {\n    if (!a) b()\n}')
+        bt('a=[];', 'a = [];')
+        bt('a=[b,c,d];', 'a = [b, c, d];')
+        bt('a= f[b];', 'a = f[b];')
+        bt(
+            '{\n' +
+            '    files: [ {\n' +
+            '        expand: true,\n' +
+            '        cwd: "www/gui/",\n' +
+            '        src: [ "im/design_standards/*.*" ],\n' +
+            '        dest: "www/gui/build"\n' +
+            '    } ]\n' +
+            '}',
+            '{\n' +
+            '    files: [{\n' +
+            '        expand: true,\n' +
+            '        cwd: "www/gui/",\n' +
+            '        src: ["im/design_standards/*.*"],\n' +
+            '        dest: "www/gui/build"\n' +
+            '    }]\n' +
+            '}')
+
+        # Space in parens tests - (s = " ", e = "")
+        self.options.space_in_paren = true
+        self.options.space_in_empty_paren = false
+        bt('if(p) foo(a,b);', 'if ( p ) foo( a, b );')
+        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }', 'try {\n    while ( true ) {\n        willThrow()\n    }\n} catch ( result ) switch ( result ) {\n    case 1:\n        ++result\n}')
+        bt('((e/((a+(b)*c)-d))^2)*5;', '( ( e / ( ( a + ( b ) * c ) - d ) ) ^ 2 ) * 5;')
+        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}', 'function f( a, b ) {\n    if ( a ) b()\n}\n\nfunction g( a, b ) {\n    if ( !a ) b()\n}')
+        bt('a=[];', 'a = [];')
+        bt('a=[b,c,d];', 'a = [ b, c, d ];')
+        bt('a= f[b];', 'a = f[ b ];')
+        bt(
+            '{\n' +
+            '    files: [ {\n' +
+            '        expand: true,\n' +
+            '        cwd: "www/gui/",\n' +
+            '        src: [ "im/design_standards/*.*" ],\n' +
+            '        dest: "www/gui/build"\n' +
+            '    } ]\n' +
+            '}')
+
+        # Space in parens tests - (s = " ", e = " ")
+        self.options.space_in_paren = true
+        self.options.space_in_empty_paren = true
+        bt('if(p) foo(a,b);', 'if ( p ) foo( a, b );')
+        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }', 'try {\n    while ( true ) {\n        willThrow( )\n    }\n} catch ( result ) switch ( result ) {\n    case 1:\n        ++result\n}')
+        bt('((e/((a+(b)*c)-d))^2)*5;', '( ( e / ( ( a + ( b ) * c ) - d ) ) ^ 2 ) * 5;')
+        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}', 'function f( a, b ) {\n    if ( a ) b( )\n}\n\nfunction g( a, b ) {\n    if ( !a ) b( )\n}')
+        bt('a=[];', 'a = [ ];')
+        bt('a=[b,c,d];', 'a = [ b, c, d ];')
+        bt('a= f[b];', 'a = f[ b ];')
+        bt(
+            '{\n' +
+            '    files: [ {\n' +
+            '        expand: true,\n' +
+            '        cwd: "www/gui/",\n' +
+            '        src: [ "im/design_standards/*.*" ],\n' +
+            '        dest: "www/gui/build"\n' +
+            '    } ]\n' +
+            '}')
+
+
+        self.reset_options();
+        #============================================================
         # New Test Suite
 
+
+        self.reset_options();
+        #============================================================
         # Async / await tests
         bt('async function foo() {}')
         bt('let w = async function foo() {}')
@@ -128,6 +347,9 @@ class TestJSBeautifier(unittest.TestCase):
         # ensure that this doesn't break anyone with the async library
         bt('async.map(function(t) {})')
 
+
+        self.reset_options();
+        #============================================================
         # e4x - Test that e4x literals passed through when e4x-option is enabled
         self.options.e4x = true
         bt('xml=<a b="c"><d/><e>\n foo</e>x</a>;', 'xml = <a b="c"><d/><e>\n foo</e>x</a>;')
@@ -143,6 +365,9 @@ class TestJSBeautifier(unittest.TestCase):
         
         # xml literals with special characters in elem names - see http://www.w3.org/TR/REC-xml/#NT-NameChar
         bt('xml = <_:.valid.xml- _:.valid.xml-="123"/>;')
+        
+        # xml literals with attributes without equal sign
+        bt('xml = <elem someAttr/>;')
         
         # Handles CDATA
         bt('xml=<![CDATA[ b="c"><d/><e v={z}>\n foo</e>x/]]>;', 'xml = <![CDATA[ b="c"><d/><e v={z}>\n foo</e>x/]]>;')
@@ -198,7 +423,7 @@ class TestJSBeautifier(unittest.TestCase):
             '\n' +
             'var HelloMessage = React.createClass({\n' +
             '    render: function() {\n' +
-            '        return <div>Hello {this.props.name}</div>;\n' +
+            '        return <div {someAttr}>Hello {this.props.name}</div>;\n' +
             '    }\n' +
             '});\n' +
             'React.render(<HelloMessage name="John" />, mountNode);')
@@ -261,7 +486,7 @@ class TestJSBeautifier(unittest.TestCase):
             '    render: function() {\n' +
             '        return (\n' +
             '            <div>\n' +
-            '                <h3>TODO</h3>\n' +
+            '                <h3 {someAttr}>TODO</h3>\n' +
             '                <TodoList items={this.state.items} />\n' +
             '                <form onSubmit={this.handleSubmit}>\n' +
             '                    <input onChange={this.onChange} value={this.state.text} />\n' +
@@ -416,15 +641,288 @@ class TestJSBeautifier(unittest.TestCase):
             '    }\n' +
             '});')
 
+
+        self.reset_options();
+        #============================================================
         # e4x disabled
         self.options.e4x = false
         bt(
             'xml=<a b="c"><d/><e>\n foo</e>x</a>;',
             'xml = < a b = "c" > < d / > < e >\n    foo < /e>x</a > ;')
 
+
+        self.reset_options();
+        #============================================================
         # Multiple braces
         bt('{{}/z/}', '{\n    {}\n    /z/\n}')
 
+
+        self.reset_options();
+        #============================================================
+        # Beautify preserve formatting
+        bt('/* beautify preserve:start */\n/* beautify preserve:end */')
+        bt('/* beautify preserve:start */\n   var a = 1;\n/* beautify preserve:end */')
+        bt('var a = 1;\n/* beautify preserve:start */\n   var a = 1;\n/* beautify preserve:end */')
+        bt('/* beautify preserve:start */     {asdklgh;y;;{}dd2d}/* beautify preserve:end */')
+        bt(
+            'var a =  1;\n/* beautify preserve:start */\n   var a = 1;\n/* beautify preserve:end */',
+            'var a = 1;\n/* beautify preserve:start */\n   var a = 1;\n/* beautify preserve:end */')
+        bt(
+            'var a = 1;\n /* beautify preserve:start */\n   var a = 1;\n/* beautify preserve:end */',
+            'var a = 1;\n/* beautify preserve:start */\n   var a = 1;\n/* beautify preserve:end */')
+        bt(
+            'var a = {\n' +
+            '    /* beautify preserve:start */\n' +
+            '    one   :  1\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '    ten   : 10\n' +
+            '    /* beautify preserve:end */\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/* beautify preserve:start */\n' +
+            '    one   :  1,\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '    ten   : 10\n' +
+            '/* beautify preserve:end */\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify preserve:start */\n' +
+            '    one   :  1,\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '    ten   : 10\n' +
+            '/* beautify preserve:end */\n' +
+            '};')
+        
+        # one space before and after required, only single spaces inside.
+        bt(
+            'var a = {\n' +
+            '/*  beautify preserve:start  */\n' +
+            '    one   :  1,\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '    ten   : 10\n' +
+            '};',
+            'var a = {\n' +
+            '    /*  beautify preserve:start  */\n' +
+            '    one: 1,\n' +
+            '    two: 2,\n' +
+            '    three: 3,\n' +
+            '    ten: 10\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/*beautify preserve:start*/\n' +
+            '    one   :  1,\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '    ten   : 10\n' +
+            '};',
+            'var a = {\n' +
+            '    /*beautify preserve:start*/\n' +
+            '    one: 1,\n' +
+            '    two: 2,\n' +
+            '    three: 3,\n' +
+            '    ten: 10\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/*beautify  preserve:start*/\n' +
+            '    one   :  1,\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '    ten   : 10\n' +
+            '};',
+            'var a = {\n' +
+            '    /*beautify  preserve:start*/\n' +
+            '    one: 1,\n' +
+            '    two: 2,\n' +
+            '    three: 3,\n' +
+            '    ten: 10\n' +
+            '};')
+        
+        # Directive: ignore
+        bt('/* beautify ignore:start */\n/* beautify ignore:end */')
+        bt('/* beautify ignore:start */\n   var a,,,{ 1;\n/* beautify ignore:end */')
+        bt('var a = 1;\n/* beautify ignore:start */\n   var a = 1;\n/* beautify ignore:end */')
+        bt('/* beautify ignore:start */     {asdklgh;y;+++;dd2d}/* beautify ignore:end */')
+        bt(
+            'var a =  1;\n/* beautify ignore:start */\n   var a,,,{ 1;\n/* beautify ignore:end */',
+            'var a = 1;\n/* beautify ignore:start */\n   var a,,,{ 1;\n/* beautify ignore:end */')
+        bt(
+            'var a = 1;\n /* beautify ignore:start */\n   var a,,,{ 1;\n/* beautify ignore:end */',
+            'var a = 1;\n/* beautify ignore:start */\n   var a,,,{ 1;\n/* beautify ignore:end */')
+        bt(
+            'var a = {\n' +
+            '    /* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            '    two   :  2,\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '    /* beautify ignore:end */\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            '    two   :  2,\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '/* beautify ignore:end */\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            '    two   :  2,\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '/* beautify ignore:end */\n' +
+            '};')
+        
+        # Directives - multiple and interacting
+        bt(
+            'var a = {\n' +
+            '/* beautify preserve:start */\n' +
+            '/* beautify preserve:start */\n' +
+            '    one   :  1,\n' +
+            '  /* beautify preserve:end */\n' +
+            '    two   :  2,\n' +
+            '    three :  3,\n' +
+            '/* beautify preserve:start */\n' +
+            '    ten   : 10\n' +
+            '/* beautify preserve:end */\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify preserve:start */\n' +
+            '/* beautify preserve:start */\n' +
+            '    one   :  1,\n' +
+            '  /* beautify preserve:end */\n' +
+            '    two: 2,\n' +
+            '    three: 3,\n' +
+            '    /* beautify preserve:start */\n' +
+            '    ten   : 10\n' +
+            '/* beautify preserve:end */\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            ' /* beautify ignore:end */\n' +
+            '    two   :  2,\n' +
+            '/* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '/* beautify ignore:end */\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            ' /* beautify ignore:end */\n' +
+            '    two: 2,\n' +
+            '    /* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '/* beautify ignore:end */\n' +
+            '};')
+        
+        # Starts can occur together, ignore:end must occur alone.
+        bt(
+            'var a = {\n' +
+            '/* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            '    NOTE: ignore end block does not support starting other directives\n' +
+            '    This does not match the ending the ignore...\n' +
+            ' /* beautify ignore:end preserve:start */\n' +
+            '    two   :  2,\n' +
+            '/* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '    ==The next comment ends the starting ignore==\n' +
+            '/* beautify ignore:end */\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify ignore:start */\n' +
+            '    one   :  1\n' +
+            '    NOTE: ignore end block does not support starting other directives\n' +
+            '    This does not match the ending the ignore...\n' +
+            ' /* beautify ignore:end preserve:start */\n' +
+            '    two   :  2,\n' +
+            '/* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '    ten   : 10\n' +
+            '    ==The next comment ends the starting ignore==\n' +
+            '/* beautify ignore:end */\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/* beautify ignore:start preserve:start */\n' +
+            '    one   :  {\n' +
+            ' /* beautify ignore:end */\n' +
+            '    two   :  2,\n' +
+            '  /* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '/* beautify ignore:end */\n' +
+            '    ten   : 10\n' +
+            '   // This is all preserved\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify ignore:start preserve:start */\n' +
+            '    one   :  {\n' +
+            ' /* beautify ignore:end */\n' +
+            '    two   :  2,\n' +
+            '  /* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '/* beautify ignore:end */\n' +
+            '    ten   : 10\n' +
+            '   // This is all preserved\n' +
+            '};')
+        bt(
+            'var a = {\n' +
+            '/* beautify ignore:start preserve:start */\n' +
+            '    one   :  {\n' +
+            ' /* beautify ignore:end */\n' +
+            '    two   :  2,\n' +
+            '  /* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '/* beautify ignore:end */\n' +
+            '    ten   : 10,\n' +
+            '/* beautify preserve:end */\n' +
+            '     eleven: 11\n' +
+            '};',
+            'var a = {\n' +
+            '    /* beautify ignore:start preserve:start */\n' +
+            '    one   :  {\n' +
+            ' /* beautify ignore:end */\n' +
+            '    two   :  2,\n' +
+            '  /* beautify ignore:start */\n' +
+            '    three :  {\n' +
+            '/* beautify ignore:end */\n' +
+            '    ten   : 10,\n' +
+            '/* beautify preserve:end */\n' +
+            '    eleven: 11\n' +
+            '};')
+
+
+        self.reset_options();
+        #============================================================
+        # Template Formatting
+        bt('<?=$view["name"]; ?>')
+        bt('a = <?= external() ?>;')
+        bt(
+            '<?php\n' +
+            'for($i = 1; $i <= 100; $i++;) {\n' +
+            '    #count to 100!\n' +
+            '    echo($i . "</br>");\n' +
+            '}\n' +
+            '?>')
+        bt('a = <%= external() %>;')
+
+
+        self.reset_options();
+        #============================================================
         # jslint and space after anon function - (f = " ", c = "")
         self.options.jslint_happy = true
         self.options.space_after_anon_function = true
@@ -434,6 +932,9 @@ class TestJSBeautifier(unittest.TestCase):
         bt(
             'x();\n\nfunction(){}',
             'x();\n\nfunction () {}')
+        bt(
+            'x();\n\nvar x = {\nx: function(){}\n}',
+            'x();\n\nvar x = {\n    x: function () {}\n}')
         bt(
             'function () {\n    var a, b, c, d, e = [],\n        f;\n}')
         bt(
@@ -464,6 +965,9 @@ class TestJSBeautifier(unittest.TestCase):
         bt(
             'x();\n\nfunction(){}',
             'x();\n\nfunction () {}')
+        bt(
+            'x();\n\nvar x = {\nx: function(){}\n}',
+            'x();\n\nvar x = {\n    x: function () {}\n}')
         bt(
             'function () {\n    var a, b, c, d, e = [],\n        f;\n}')
         bt(
@@ -495,6 +999,9 @@ class TestJSBeautifier(unittest.TestCase):
             'x();\n\nfunction(){}',
             'x();\n\nfunction () {}')
         bt(
+            'x();\n\nvar x = {\nx: function(){}\n}',
+            'x();\n\nvar x = {\n    x: function () {}\n}')
+        bt(
             'function () {\n    var a, b, c, d, e = [],\n        f;\n}')
         bt(
             'switch(x) {case 0: case 1: a(); break; default: break}',
@@ -525,6 +1032,9 @@ class TestJSBeautifier(unittest.TestCase):
             'x();\n\nfunction(){}',
             'x();\n\nfunction() {}')
         bt(
+            'x();\n\nvar x = {\nx: function(){}\n}',
+            'x();\n\nvar x = {\n    x: function() {}\n}')
+        bt(
             'function () {\n    var a, b, c, d, e = [],\n        f;\n}',
             'function() {\n    var a, b, c, d, e = [],\n        f;\n}')
         bt(
@@ -546,6 +1056,9 @@ class TestJSBeautifier(unittest.TestCase):
         bt('function*() {\n    yield 1;\n}')
         bt('function* x() {\n    yield 1;\n}')
 
+
+        self.reset_options();
+        #============================================================
         # Regression tests
         
         # Issue 241
@@ -781,7 +1294,223 @@ class TestJSBeautifier(unittest.TestCase):
             '    phantom.onError = function() {};\n' +
             '}\n' +
             '// Comment')
+        
+        # Issue 806 - newline arrow functions
+        bt(
+            'a.b("c",\n' +
+            '    () => d.e\n' +
+            ')')
+        
+        # Issue 810 - es6 object literal detection
+        bt(
+            'function badFormatting() {\n' +
+            '    return {\n' +
+            '        a,\n' +
+            '        b: c,\n' +
+            '        d: e,\n' +
+            '        f: g,\n' +
+            '        h,\n' +
+            '        i,\n' +
+            '        j: k\n' +
+            '    }\n' +
+            '}\n' +
+            '\n' +
+            'function goodFormatting() {\n' +
+            '    return {\n' +
+            '        a: b,\n' +
+            '        c,\n' +
+            '        d: e,\n' +
+            '        f: g,\n' +
+            '        h,\n' +
+            '        i,\n' +
+            '        j: k\n' +
+            '    }\n' +
+            '}')
+        
+        # Issue 602 - ES6 object literal shorthand functions
+        bt(
+            'return {\n' +
+            '    fn1() {},\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'throw {\n' +
+            '    fn1() {},\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'foo({\n' +
+            '    fn1(a) {}\n' +
+            '    fn2(a) {}\n' +
+            '})')
+        bt(
+            'foo("text", {\n' +
+            '    fn1(a) {}\n' +
+            '    fn2(a) {}\n' +
+            '})')
+        bt(
+            'oneArg = {\n' +
+            '    fn1(a) {\n' +
+            '        do();\n' +
+            '    },\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'multiArg = {\n' +
+            '    fn1(a, b, c) {\n' +
+            '        do();\n' +
+            '    },\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'noArgs = {\n' +
+            '    fn1() {\n' +
+            '        do();\n' +
+            '    },\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'emptyFn = {\n' +
+            '    fn1() {},\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'nested = {\n' +
+            '    fns: {\n' +
+            '        fn1() {},\n' +
+            '        fn2() {}\n' +
+            '    }\n' +
+            '}')
+        bt(
+            'array = [{\n' +
+            '    fn1() {},\n' +
+            '    prop: val,\n' +
+            '    fn2() {}\n' +
+            '}]')
+        bt(
+            'expr = expr ? expr : {\n' +
+            '    fn1() {},\n' +
+            '    fn2() {}\n' +
+            '}')
+        bt(
+            'strange = valid + {\n' +
+            '    fn1() {},\n' +
+            '    fn2() {\n' +
+            '        return 1;\n' +
+            '    }\n' +
+            '}.fn2()')
+        
+        # Issue 854 - Arrow function with statement block
+        bt(
+            'test(() => {\n' +
+            '    var a = {}\n' +
+            '\n' +
+            '    a.what = () => true ? 1 : 2\n' +
+            '\n' +
+            '    a.thing = () => {\n' +
+            '        b();\n' +
+            '    }\n' +
+            '})')
+        
+        # Issue 406 - Multiline array
+        bt(
+            'var tempName = [\n' +
+            '    "temp",\n' +
+            '    process.pid,\n' +
+            '    (Math.random() * 0x1000000000).toString(36),\n' +
+            '    new Date().getTime()\n' +
+            '].join("-");')
 
+
+        self.reset_options();
+        #============================================================
+        # Destructured and related
+        self.options.brace_style = 'collapse-preserve-inline'
+        
+        # Issue 382 - import destructured 
+        bt(
+            'module "Even" {\n' +
+            '    import { odd, oddly } from "Odd";\n' +
+            '}')
+        bt(
+            'import defaultMember from "module-name";\n' +
+            'import * as name from "module-name";\n' +
+            'import { member } from "module-name";\n' +
+            'import { member as alias } from "module-name";\n' +
+            'import { member1, member2 } from "module-name";\n' +
+            'import { member1, member2 as alias2 } from "module-name";\n' +
+            'import defaultMember, { member, member2 } from "module-name";\n' +
+            'import defaultMember, * as name from "module-name";\n' +
+            'import "module-name";')
+        
+        # Issue 858 - from is a keyword only after import
+        bt(
+            'if (from < to) {\n' +
+            '    from++;\n' +
+            '} else {\n' +
+            '    from--;\n' +
+            '}')
+        
+        # Issue 511 - destrutured
+        bt(
+            'var { b, c } = require("../stores");\n' +
+            'var { ProjectStore } = require("../stores");\n' +
+            '\n' +
+            'function takeThing({ prop }) {\n' +
+            '    console.log("inner prop", prop)\n' +
+            '}')
+        
+        # Issue 315 - Short objects
+        bt(
+            'var a = { b: { c: { d: e } } };')
+        bt(
+            'var a = {\n' +
+            '    b: {\n' +
+            '        c: { d: e }\n' +
+            '        c3: { d: e }\n' +
+            '    },\n' +
+            '    b2: { c: { d: e } }\n' +
+            '};')
+        
+        # Issue 370 - Short objects in array
+        bt(
+            'var methods = [\n' +
+            '    { name: "to" },\n' +
+            '    { name: "step" },\n' +
+            '    { name: "move" },\n' +
+            '    { name: "min" },\n' +
+            '    { name: "max" }\n' +
+            '];')
+        
+        # Issue 838 - Short objects in array
+        bt(
+            'function(url, callback) {\n' +
+            '    var script = document.createElement("script")\n' +
+            '    if (true) script.onreadystatechange = function() {\n' +
+            '        foo();\n' +
+            '    }\n' +
+            '    else script.onload = callback;\n' +
+            '}')
+        
+        # Issue 578 - Odd indenting after function
+        bt(
+            'function bindAuthEvent(eventName) {\n' +
+            '    self.auth.on(eventName, function(event, meta) {\n' +
+            '        self.emit(eventName, event, meta);\n' +
+            '    });\n' +
+            '}\n' +
+            '["logged_in", "logged_out", "signed_up", "updated_user"].forEach(bindAuthEvent);')
+        
+        # Issue #487 - some short expressions examples
+        bt(
+            'if (a == 1) { a++; }\n' +
+            'a = { a: a };\n' +
+            'UserDB.findOne({ username: "xyz" }, function(err, user) {});\n' +
+            'import { fs } from "fs";')
+
+
+        self.reset_options();
+        #============================================================
         # Old tests
         bt('')
         test_fragment('   return .5')
@@ -820,8 +1549,95 @@ class TestJSBeautifier(unittest.TestCase):
         bt('a <= .5')
         bt('a<.5', 'a < .5')
         bt('a<=.5', 'a <= .5')
-        bt('a = 0xff;')
-        bt('a=0xff+4', 'a = 0xff + 4')
+        
+        # exponent literals
+        bt('a = 1e10')
+        bt('a = 1.3e10')
+        bt('a = 1.3e-10')
+        bt('a = -12345.3e-10')
+        bt('a = .12345e-10')
+        bt('a = 06789e-10')
+        bt('a = e - 10')
+        bt('a = 1.3e+10')
+        bt('a = -12345.3e+10')
+        bt('a = .12345e+10')
+        bt('a = 06789e+10')
+        bt('a = e + 10')
+        bt('a=0e-12345.3e-10', 'a = 0e-12345 .3e-10')
+        bt('a=0.e-12345.3e-10', 'a = 0. e - 12345.3e-10')
+        bt('a=0x.e-12345.3e-10', 'a = 0x.e - 12345.3e-10')
+        bt('a=0x0.e-12345.3e-10', 'a = 0x0.e - 12345.3e-10')
+        bt('a=0x0.0e-12345.3e-10', 'a = 0x0 .0e-12345 .3e-10')
+        bt('a=0g-12345.3e-10', 'a = 0 g - 12345.3e-10')
+        bt('a=0.g-12345.3e-10', 'a = 0. g - 12345.3e-10')
+        bt('a=0x.g-12345.3e-10', 'a = 0x.g - 12345.3e-10')
+        bt('a=0x0.g-12345.3e-10', 'a = 0x0.g - 12345.3e-10')
+        bt('a=0x0.0g-12345.3e-10', 'a = 0x0 .0 g - 12345.3e-10')
+        
+        # Decimal literals
+        bt('a = 0123456789;')
+        bt('a = 9876543210;')
+        bt('a = 5647308291;')
+        bt('a=030e-5', 'a = 030e-5')
+        bt('a=00+4', 'a = 00 + 4')
+        bt('a=32+4', 'a = 32 + 4')
+        bt('a=0.6g+4', 'a = 0.6 g + 4')
+        bt('a=01.10', 'a = 01.10')
+        bt('a=a.10', 'a = a .10')
+        bt('a=00B0x0', 'a = 00 B0x0')
+        bt('a=00B0xb0', 'a = 00 B0xb0')
+        bt('a=00B0x0b0', 'a = 00 B0x0b0')
+        bt('a=0090x0', 'a = 0090 x0')
+        bt('a=0g0b0o0', 'a = 0 g0b0o0')
+        
+        # Hexadecimal literals
+        bt('a = 0x0123456789abcdef;')
+        bt('a = 0X0123456789ABCDEF;')
+        bt('a = 0xFeDcBa9876543210;')
+        bt('a=0x30e-5', 'a = 0x30e - 5')
+        bt('a=0xF0+4', 'a = 0xF0 + 4')
+        bt('a=0Xff+4', 'a = 0Xff + 4')
+        bt('a=0Xffg+4', 'a = 0Xff g + 4')
+        bt('a=0x01.10', 'a = 0x01 .10')
+        bt('a = 0xb0ce;')
+        bt('a = 0x0b0;')
+        bt('a=0x0B0x0', 'a = 0x0B0 x0')
+        bt('a=0x0B0xb0', 'a = 0x0B0 xb0')
+        bt('a=0x0B0x0b0', 'a = 0x0B0 x0b0')
+        bt('a=0X090x0', 'a = 0X090 x0')
+        bt('a=0Xg0b0o0', 'a = 0X g0b0o0')
+        
+        # Octal literals
+        bt('a = 0o01234567;')
+        bt('a = 0O01234567;')
+        bt('a = 0o34120675;')
+        bt('a=0o30e-5', 'a = 0o30 e - 5')
+        bt('a=0o70+4', 'a = 0o70 + 4')
+        bt('a=0O77+4', 'a = 0O77 + 4')
+        bt('a=0O778+4', 'a = 0O77 8 + 4')
+        bt('a=0O77a+4', 'a = 0O77 a + 4')
+        bt('a=0o01.10', 'a = 0o01 .10')
+        bt('a=0o0B0x0', 'a = 0o0 B0x0')
+        bt('a=0o0B0xb0', 'a = 0o0 B0xb0')
+        bt('a=0o0B0x0b0', 'a = 0o0 B0x0b0')
+        bt('a=0O090x0', 'a = 0O0 90 x0')
+        bt('a=0Og0b0o0', 'a = 0O g0b0o0')
+        
+        # Binary literals
+        bt('a = 0b010011;')
+        bt('a = 0B010011;')
+        bt('a = 0b01001100001111;')
+        bt('a=0b10e-5', 'a = 0b10 e - 5')
+        bt('a=0b10+4', 'a = 0b10 + 4')
+        bt('a=0B11+4', 'a = 0B11 + 4')
+        bt('a=0B112+4', 'a = 0B11 2 + 4')
+        bt('a=0B11a+4', 'a = 0B11 a + 4')
+        bt('a=0b01.10', 'a = 0b01 .10')
+        bt('a=0b0B0x0', 'a = 0b0 B0x0')
+        bt('a=0b0B0xb0', 'a = 0b0 B0xb0')
+        bt('a=0b0B0x0b0', 'a = 0b0 B0x0b0')
+        bt('a=0B090x0', 'a = 0B0 90 x0')
+        bt('a=0Bg0b0o0', 'a = 0B g0b0o0')
         bt('a = [1, 2, 3, 4]')
         bt('F*(g/=f)*g+b', 'F * (g /= f) * g + b')
         bt('a.b({c:d})', 'a.b({\n    c: d\n})')
@@ -892,13 +1708,6 @@ class TestJSBeautifier(unittest.TestCase):
         bt('return this.prevObject ||\n\n    this.constructor(null);')
         bt('If[1]')
         bt('Then[1]')
-        bt('a = 1e10')
-        bt('a = 1.3e10')
-        bt('a = 1.3e-10')
-        bt('a = -1.3e-10')
-        bt('a = 1e-10')
-        bt('a = e - 10')
-        bt('a = 11-10', 'a = 11 - 10')
         bt('a = 1;// comment', 'a = 1; // comment')
         bt('a = 1; // comment')
         bt('a = 1;\n // comment', 'a = 1;\n// comment')
@@ -985,8 +1794,6 @@ class TestJSBeautifier(unittest.TestCase):
         # incomplete regexp
         test_fragment('a=/regexp', 'a = /regexp')
         bt('{a:#1=[],b:#1#,c:#999999#}', '{\n    a: #1=[],\n    b: #1#,\n    c: #999999#\n}')
-        bt('a = 1e+2')
-        bt('a = 1e-2')
         bt('do{x()}while(a>1)', 'do {\n    x()\n} while (a > 1)')
         bt('x(); /reg/exp.match(something)', 'x();\n/reg/exp.match(something)')
         test_fragment('something();(', 'something();\n(')
@@ -1120,8 +1927,14 @@ class TestJSBeautifier(unittest.TestCase):
         bt('var a=1,b={bang:2},c=3;', 'var a = 1,\n    b = {\n        bang: 2\n    },\n    c = 3;')
         bt('var a={bing:1},b=2,c=3;', 'var a = {\n        bing: 1\n    },\n    b = 2,\n    c = 3;')
 
-        bt('{{}/z/}', "{\n    {}\n    /z/\n}")
 
+
+    def test_beautifier_unconverted(self):
+        test_fragment = self.decodesto
+        bt = self.bt
+
+        self.reset_options();
+        #============================================================
         self.options.indent_size = 1;
         self.options.indent_char = ' ';
         bt('{ one_char() }', "{\n one_char()\n}")
@@ -1145,10 +1958,9 @@ class TestJSBeautifier(unittest.TestCase):
         bt('{ one_char() }', "{\n\tone_char()\n}")
         bt('x = a ? b : c; x;', 'x = a ? b : c;\nx;')
 
-        self.options.indent_size = 4;
-        self.options.indent_char = ' ';
-        self.options.indent_with_tabs = False;
 
+        self.reset_options();
+        #============================================================
         self.options.preserve_newlines = False;
         bt('var\na=dont_preserve_newlines;', 'var a = dont_preserve_newlines;')
 
@@ -1169,6 +1981,8 @@ class TestJSBeautifier(unittest.TestCase):
         bt('if (foo) //  comment\n{\n    bar();\n}')
 
 
+        self.reset_options();
+        #============================================================
         self.options.keep_array_indentation = False;
         bt("a = ['a', 'b', 'c',\n    'd', 'e', 'f']",
             "a = ['a', 'b', 'c',\n    'd', 'e', 'f'\n]")
@@ -1308,18 +2122,17 @@ class TestJSBeautifier(unittest.TestCase):
 #             "   ];\n" +
 #             "}")
 
-        self.options.keep_array_indentation = False;
-
+        self.reset_options();
+        #============================================================
         bt('a = //comment\n    /regex/;')
-
-        test_fragment('/*\n * X\n */')
-        test_fragment('/*\r\n * X\r\n */', '/*\n * X\n */')
 
         bt('if (a)\n{\nb;\n}\nelse\n{\nc;\n}', 'if (a) {\n    b;\n} else {\n    c;\n}')
 
         bt('var a = new function();')
         test_fragment('new function')
 
+        self.reset_options();
+        #============================================================
         # START tests for brace positioning
 
         # If this is ever supported, update tests for each brace style.
@@ -1693,14 +2506,13 @@ class TestJSBeautifier(unittest.TestCase):
             "    });")
         # END tests for brace position
 
-        self.options.brace_style = 'collapse';
-
-        bt('a = <?= external() ?> ;') # not the most perfect thing in the world, but you're the weirdo beaufifying php mix-ins with javascript beautifier
-        bt('a = <%= external() %> ;')
-
+        self.reset_options();
+        #============================================================
         test_fragment('roo = {\n    /*\n    ****\n      FOO\n    ****\n    */\n    BAR: 0\n};')
         test_fragment("if (zz) {\n    // ....\n}\n(function")
 
+        self.reset_options();
+        #============================================================
         self.options.preserve_newlines = True;
         bt('var a = 42; // foo\n\nvar b;')
         bt('var a = 42; // foo\n\n\nvar b;')
@@ -1736,8 +2548,6 @@ class TestJSBeautifier(unittest.TestCase):
         bt('function a(a) {} function b(b) {} function c(c) {}', 'function a(a) {}\n\nfunction b(b) {}\n\nfunction c(c) {}')
 
 
-        bt('3.*7;', '3. * 7;')
-        bt('a = 1.e-64 * 0.5e+4 / 6e-23;')
         bt('import foo.*;', 'import foo.*;') # actionscript's import
         test_fragment('function f(a: a, b: b)') # actionscript
         bt('foo(a, function() {})')
@@ -1745,6 +2555,8 @@ class TestJSBeautifier(unittest.TestCase):
 
         bt('/* foo */\n"x"')
 
+        self.reset_options();
+        #============================================================
         self.options.break_chained_methods = False
         self.options.preserve_newlines = False
         bt('foo\n.bar()\n.baz().cucumber(fat)', 'foo.bar().baz().cucumber(fat)')
@@ -1780,15 +2592,16 @@ class TestJSBeautifier(unittest.TestCase):
         bt('this\n.something = foo.bar()\n.baz().cucumber(fat)', 'this\n    .something = foo.bar()\n    .baz()\n    .cucumber(fat)')
         bt('this.something.xxx = foo.moo.bar()')
         bt('this\n.something\n.xxx = foo.moo\n.bar()', 'this\n    .something\n    .xxx = foo.moo\n    .bar()')
-        self.options.break_chained_methods = False
-        self.options.preserve_newlines = False
 
-
+        self.reset_options();
+        #============================================================
         # Line wrap test intputs
         #..............---------1---------2---------3---------4---------5---------6---------7
         #..............1234567890123456789012345678901234567890123456789012345678901234567890
         wrap_input_1=('foo.bar().baz().cucumber((fat && "sassy") || (leans\n&& mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n.but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap.but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_\n.okay();\n' +
                       'object_literal = {\n' +
                       '    propertx: first_token + 12345678.99999E-6,\n' +
@@ -1802,6 +2615,8 @@ class TestJSBeautifier(unittest.TestCase):
         wrap_input_2=('{\n' +
                       '    foo.bar().baz().cucumber((fat && "sassy") || (leans\n&& mean));\n' +
                       '    Test_very_long_variable_name_this_should_never_wrap\n.but_this_can\n' +
+                      '    return between_return_and_expression_should_never_wrap.but_this_can\n' +
+                      '    throw between_throw_and_expression_should_never_wrap.but_this_can\n' +
                       '    if (wraps_can_occur && inside_an_if_block) that_is_\n.okay();\n' +
                       '    object_literal = {\n' +
                       '        propertx: first_token + 12345678.99999E-6,\n' +
@@ -1819,6 +2634,8 @@ class TestJSBeautifier(unittest.TestCase):
                       # expected #
                       'foo.bar().baz().cucumber((fat && "sassy") || (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap.but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap.but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_.okay();\n' +
                       'object_literal = {\n' +
                       '    propertx: first_token + 12345678.99999E-6,\n' +
@@ -1834,6 +2651,8 @@ class TestJSBeautifier(unittest.TestCase):
                       # expected #
                       'foo.bar().baz().cucumber((fat && "sassy") || (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap.but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap.but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_.okay();\n' +
                       'object_literal = {\n' +
                       '    propertx: first_token + 12345678.99999E-6,\n' +
@@ -1850,6 +2669,10 @@ class TestJSBeautifier(unittest.TestCase):
                       'foo.bar().baz().cucumber((fat &&\n' +
                       '    "sassy") || (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap\n' +
                       '    .but_this_can\n' +
                       'if (wraps_can_occur &&\n' +
                       '    inside_an_if_block) that_is_.okay();\n' +
@@ -1873,6 +2696,10 @@ class TestJSBeautifier(unittest.TestCase):
                       'foo.bar().baz().cucumber((fat && "sassy") ||\n' +
                       '    (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap\n' +
                       '    .but_this_can\n' +
                       'if (wraps_can_occur &&\n' +
                       '    inside_an_if_block) that_is_.okay();\n' +
@@ -1898,6 +2725,10 @@ class TestJSBeautifier(unittest.TestCase):
                       '    foo.bar().baz().cucumber((fat && "sassy") ||\n' +
                       '        (leans && mean));\n' +
                       '    Test_very_long_variable_name_this_should_never_wrap\n' +
+                      '        .but_this_can\n' +
+                      '    return between_return_and_expression_should_never_wrap\n' +
+                      '        .but_this_can\n' +
+                      '    throw between_throw_and_expression_should_never_wrap\n' +
                       '        .but_this_can\n' +
                       '    if (wraps_can_occur &&\n' +
                       '        inside_an_if_block) that_is_.okay();\n' +
@@ -1922,6 +2753,8 @@ class TestJSBeautifier(unittest.TestCase):
                       'foo.bar().baz().cucumber((fat && "sassy") || (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n' +
                       '    .but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap.but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_\n' +
                       '    .okay();\n' +
                       'object_literal = {\n' +
@@ -1940,6 +2773,8 @@ class TestJSBeautifier(unittest.TestCase):
                       'foo.bar().baz().cucumber((fat && "sassy") || (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n' +
                       '    .but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap.but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap.but_this_can\n' +
                       'if (wraps_can_occur && inside_an_if_block) that_is_\n' +
                       '    .okay();\n' +
                       'object_literal = {\n' +
@@ -1958,6 +2793,10 @@ class TestJSBeautifier(unittest.TestCase):
                       'foo.bar().baz().cucumber((fat &&\n' +
                       '    "sassy") || (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap\n' +
                       '    .but_this_can\n' +
                       'if (wraps_can_occur &&\n' +
                       '    inside_an_if_block) that_is_\n' +
@@ -1982,6 +2821,10 @@ class TestJSBeautifier(unittest.TestCase):
                       'foo.bar().baz().cucumber((fat && "sassy") ||\n' +
                       '    (leans && mean));\n' +
                       'Test_very_long_variable_name_this_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'return between_return_and_expression_should_never_wrap\n' +
+                      '    .but_this_can\n' +
+                      'throw between_throw_and_expression_should_never_wrap\n' +
                       '    .but_this_can\n' +
                       'if (wraps_can_occur &&\n' +
                       '    inside_an_if_block) that_is_\n' +
@@ -2008,6 +2851,10 @@ class TestJSBeautifier(unittest.TestCase):
                       '        (leans && mean));\n' +
                       '    Test_very_long_variable_name_this_should_never_wrap\n' +
                       '        .but_this_can\n' +
+                      '    return between_return_and_expression_should_never_wrap\n' +
+                      '        .but_this_can\n' +
+                      '    throw between_throw_and_expression_should_never_wrap\n' +
+                      '        .but_this_can\n' +
                       '    if (wraps_can_occur &&\n' +
                       '        inside_an_if_block) that_is_\n' +
                       '        .okay();\n' +
@@ -2023,8 +2870,8 @@ class TestJSBeautifier(unittest.TestCase):
                       '    }\n'+
                       '}')
 
-        self.options.wrap_line_length = 0
-
+        self.reset_options();
+        #============================================================
         self.options.preserve_newlines = False
         bt('if (foo) // comment\n    bar();')
         bt('if (foo) // comment\n    (bar());')
@@ -2196,56 +3043,8 @@ class TestJSBeautifier(unittest.TestCase):
         bt('a = 1;\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nb = 2;',
             'a = 1;\n\n\n\n\n\n\n\nb = 2;')
 
-        # Test the option to have spaces within parens
-        self.options.space_in_paren = False
-        self.options.space_in_empty_paren = False
-        bt('if(p) foo(a,b)', 'if (p) foo(a, b)')
-        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }',
-           'try {\n    while (true) {\n        willThrow()\n    }\n} catch (result) switch (result) {\n    case 1:\n        ++result\n}')
-        bt('((e/((a+(b)*c)-d))^2)*5;', '((e / ((a + (b) * c) - d)) ^ 2) * 5;')
-        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}',
-            'function f(a, b) {\n    if (a) b()\n}\n\nfunction g(a, b) {\n    if (!a) b()\n}')
-        bt('a=[];',
-            'a = [];')
-        bt('a=[b,c,d];',
-            'a = [b, c, d];')
-        bt('a= f[b];',
-            'a = f[b];')
-
-        self.options.space_in_paren = True
-        bt('if(p) foo(a,b)', 'if ( p ) foo( a, b )')
-        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }',
-           'try {\n    while ( true ) {\n        willThrow()\n    }\n} catch ( result ) switch ( result ) {\n    case 1:\n        ++result\n}')
-        bt('((e/((a+(b)*c)-d))^2)*5;', '( ( e / ( ( a + ( b ) * c ) - d ) ) ^ 2 ) * 5;')
-        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}',
-            'function f( a, b ) {\n    if ( a ) b()\n}\n\nfunction g( a, b ) {\n    if ( !a ) b()\n}')
-        bt('a=[ ];',
-            'a = [];')
-        bt('a=[b,c,d];',
-            'a = [ b, c, d ];')
-        bt('a= f[b];',
-            'a = f[ b ];')
-
-        self.options.space_in_empty_paren = True
-        bt('if(p) foo(a,b)', 'if ( p ) foo( a, b )')
-        bt('try{while(true){willThrow()}}catch(result)switch(result){case 1:++result }',
-           'try {\n    while ( true ) {\n        willThrow( )\n    }\n} catch ( result ) switch ( result ) {\n    case 1:\n        ++result\n}')
-        bt('((e/((a+(b)*c)-d))^2)*5;', '( ( e / ( ( a + ( b ) * c ) - d ) ) ^ 2 ) * 5;')
-        bt('function f(a,b) {if(a) b()}function g(a,b) {if(!a) b()}',
-            'function f( a, b ) {\n    if ( a ) b( )\n}\n\nfunction g( a, b ) {\n    if ( !a ) b( )\n}')
-        bt('a=[ ];',
-            'a = [ ];')
-        bt('a=[b,c,d];',
-            'a = [ b, c, d ];')
-        bt('a= f[b];',
-            'a = f[ b ];')
-
-        self.options.space_in_paren = False
-        self.options.space_in_empty_paren = False
-
-        # Test template strings
-        bt('`This is a ${template} string.`', '`This is a ${template} string.`')
-        bt('`This\n  is\n  a\n  ${template}\n  string.`', '`This\n  is\n  a\n  ${template}\n  string.`')
+        self.reset_options();
+        #============================================================
 
 
     def decodesto(self, input, expectation=None):
@@ -2261,6 +3060,16 @@ class TestJSBeautifier(unittest.TestCase):
             self.assertMultiLineEqual(
                 jsbeautifier.beautify(expectation, self.options), expectation)
 
+        # Everywhere we do newlines, they should be replaced with opts.eol
+        self.options.eol = '\r\\n';
+        expectation = expectation.replace('\n', '\r\n')
+        self.assertMultiLineEqual(
+            jsbeautifier.beautify(input, self.options), expectation)
+        input = input.replace('\n', '\r\n')
+        self.assertMultiLineEqual(
+            jsbeautifier.beautify(input, self.options), expectation)
+        self.options.eol = '\n'
+
     def wrap(self, text):
         return self.wrapregex.sub('    \\1', text)
 
@@ -2269,35 +3078,22 @@ class TestJSBeautifier(unittest.TestCase):
             expectation = input
 
         self.decodesto(input, expectation)
+        # If we set raw, input should be unchanged
+        self.options.test_output_raw = True
+        if self.options.end_with_newline:
+            elf.decodesto(input, input)
+        self.options.test_output_raw = False
+
         if self.options.indent_size == 4 and input:
-            wrapped_input = '{\n%s\nfoo=bar;}' % self.wrap(input)
+            wrapped_input = '{\n%s\n    foo = bar;\n}' % self.wrap(input)
             wrapped_expect = '{\n%s\n    foo = bar;\n}' % self.wrap(expectation)
             self.decodesto(wrapped_input, wrapped_expect)
 
-            # Everywhere we do newlines, they should be replaced with opts.eol
-            self.options.eol = '\r\\n';
-            wrapped_input = wrapped_input.replace('\n', '\r\n')
-            wrapped_expect = wrapped_expect.replace('\n', '\r\n')
-            self.decodesto(wrapped_input, wrapped_expect)
-            self.options.eol = '\n'
-
-
-    @classmethod
-    def setUpClass(cls):
-        options = jsbeautifier.default_options()
-        options.indent_size = 4
-        options.indent_char = ' '
-        options.preserve_newlines = True
-        options.jslint_happy = False
-        options.keep_array_indentation = False
-        options.brace_style = 'collapse'
-        options.indent_level = 0
-        options.break_chained_methods = False
-        options.eol = '\n'
-
-
-        cls.options = options
-        cls.wrapregex = re.compile('^(.+)$', re.MULTILINE)
+            # If we set raw, input should be unchanged
+            self.options.test_output_raw = True
+            if self.options.end_with_newline:
+                elf.decodesto(wrapped_input, wrapped_input)
+            self.options.test_output_raw = False
 
 
 if __name__ == '__main__':
