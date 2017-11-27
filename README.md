@@ -1,6 +1,6 @@
 [![Join the chat at https://gitter.im/jdc0589/JsFormat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jdc0589/JsFormat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# LOOKING FOR A NEW MAINTAINER
+# LOOKING FOR AN ADDITIONAL MAINTAINER
 I haven't been giving JsFormat the attention it deserves lately, and I'd like to bring on someone else to help maintain the project. Shoot me an email if you are interested. 
 
 ## About
