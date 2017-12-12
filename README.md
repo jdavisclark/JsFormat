@@ -1,4 +1,3 @@
-[![Join the chat at https://gitter.im/jdc0589/JsFormat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jdc0589/JsFormat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjdc0589%2FJsFormat.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjdc0589%2FJsFormat?ref=badge_shield)
 
 # LOOKING FOR AN ADDITIONAL MAINTAINER
