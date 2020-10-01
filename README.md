@@ -19,7 +19,7 @@ It uses [jsbeautifier](https://github.com/beautify-web/js-beautify) to format wh
 ## Settings
 JsFormat uses whatever tab/indent settings are configured with the standard ```translate_tabs_to_spaces``` and ```tab_size``` sublime settings.
 
-The following **JsBeautifier** settings are available in JsFormat/JsFormat.sublime-settings (defaults shown below). Check out the official [jsbeautifier documentation](https://github.com/einars/js-beautify#options) for more details on the options:
+The following **JsBeautifier** settings are available in JsFormat/JsFormat.sublime-settings (defaults shown below). Check out the official [jsbeautifier documentation] (https://github.com/einars/js-beautify#options) for more details on the options:
 
 * `indent_with_tabs`: false
 * `max_preserve_newlines`: 4
