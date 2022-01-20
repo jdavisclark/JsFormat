@@ -2671,8 +2671,7 @@ class TestJSBeautifier(unittest.TestCase):
 
         # jslint and space after anon function - (f = "", c = "    ")
         self.reset_options();
-        self.options.jslint_happy = false
-        self.options.space_after_anon_function = false
+        self.options.jslint_happy , self.options.space_after_anon_function  = false, false
         bt(
             'a=typeof(x)',
             #  -- output --
