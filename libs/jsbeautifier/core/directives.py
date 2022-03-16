@@ -22,17 +22,35 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
 
-class Token:
-    def __init__(self, type, text, newlines=0, whitespace_before=""):
-        self.type = type
-        self.text = text
-        self.comments_before = None
-        self.newlines = newlines
-        self.whitespace_before = whitespace_before
-        self.parent = None
-        self.next = None
-        self.previous = None
-        self.opened = None
-        self.closed = None
-        self.directives = None
+
+class Directives:
+    def __init__(self, start_block_pattern, end_block_pattern):
+
+        self.__directives_block_pattern = re.compile(
+            start_block_pattern + r" beautify( \w+[:]\w+)+ " + end_block_pattern
+        )
+        self.__directive_pattern = re.compile(r" (\w+)[:](\w+)")
+
+        self.__directives_end_ignore_pattern = re.compile(
+            start_block_pattern + r"\sbeautify\signore:end\s" + end_block_pattern
+        )
+
+    def get_directives(self, text):
+        if not self.__directives_block_pattern.match(text):
+            return None
+
+        directives = {}
+        directive_match = self.__directive_pattern.search(text)
+
+        while directive_match:
+            directives[directive_match.group(1)] = directive_match.group(2)
+            directive_match = self.__directive_pattern.search(
+                text, directive_match.end()
+            )
+
+        return directives
+
+    def readIgnored(self, input):
+        return input.readUntilAfter(self.__directives_end_ignore_pattern)
