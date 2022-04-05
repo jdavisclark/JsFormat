@@ -3,7 +3,7 @@
 # LOOKING FOR AN ADDITIONAL MAINTAINER
 I haven't been giving JsFormat the attention it deserves lately, and I'd like to bring on someone else to help maintain the project. Shoot me an email if you are interested. 
 
-## About
+## About the project
 JsFormat is a javascript formatting plugin for Sublime Text 2.
 It uses [jsbeautifier](https://github.com/beautify-web/js-beautify) to format whole js or json files, or the selected portion(s).
 
@@ -59,7 +59,7 @@ A hierarchy of `.jsbeautifyrc` files is supported, where rc files at the deeper 
 
 
 
-## Install
+## Installation
 #### [Package Control](https://github.com/wbond/sublime_package_control) (Recommended)
 JsFormat is now included in the default repository channel for [Package Control](https://github.com/wbond/sublime_package_control). It should show up in your install list
 with no changes.
@@ -75,7 +75,7 @@ Clone this repository in to the Sublime Text 2 "Packages" directory, which is lo
 
 
 
-## Key Binding
+## Key Bindings
 
 The default key binding is "ctrl+alt+f"
 
